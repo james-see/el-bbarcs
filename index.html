@@ -727,8 +727,9 @@ window.dbExec = async function(sql) {
 window.dbRecordGame = async function(p1Name, p2Name, p1Score, p2Score, winner) {
   if (!dbReady) return;
   await dbExec(`INSERT INTO games (id, player1_name, player2_name, player1_score, player2_score, winner) VALUES (nextval('seq_games'), '${p1Name}', '${p2Name}', ${p1Score}, ${p2Score}, '${winner}')`);
-  // Update player stats
+  // Update player stats — skip "Computer" so we don't create AI player records
   for (const [name, score, won] of [[p1Name, p1Score, winner === p1Name], [p2Name, p2Score, winner === p2Name]]) {
+    if (name === 'Computer' || name.startsWith('Computer (')) continue;
     const existing = await dbQuery(`SELECT id FROM players WHERE name = '${name}'`);
     if (existing && existing.length > 0) {
       await dbExec(`UPDATE players SET games_played = games_played + 1, games_won = games_won + ${won ? 1 : 0}, total_score = total_score + ${score} WHERE name = '${name}'`);
@@ -1355,7 +1356,7 @@ function checkGameEnd() {
   }
 }
 
-function endGame() {
+async function endGame() {
   G.gameOver = true;
   G.players.forEach(p => { let penalty = 0; for (const t of p.rack) penalty += t.value; p.score -= penalty; });
 
@@ -1379,10 +1380,12 @@ function endGame() {
   if (window.dbRecordGame) {
     const p1 = G.players[0], p2 = G.players[1];
     const winnerName = tie ? 'Tie' : winner.name;
-    window.dbRecordGame(p1.name, p2.name, p1.score, p2.score, winnerName);
+    // For AI games, use generic "Computer" as p2 name so we don't create per-difficulty player records
+    const p2Name = aiOpponent ? 'Computer' : p2.name;
+    await window.dbRecordGame(p1.name, p2Name, p1.score, p2.score, winnerName);
   }
-  // Refresh stats display
-  refreshStats();
+  // Refresh stats display after DB write completes
+  await refreshStats();
 }
 
 // ============================================================
@@ -1547,6 +1550,9 @@ async function loginUser(username) {
   }
 
   currentUser = { name: username };
+  // Persist last logged-in user in DuckDB so it survives refresh
+  await window.dbExec(`CREATE TABLE IF NOT EXISTS session (key VARCHAR PRIMARY KEY, value VARCHAR)`);
+  await window.dbExec(`INSERT OR REPLACE INTO session (key, value) VALUES ('last_user', '${username}')`);
   updateUserUI();
   refreshStats();
   return true;
@@ -1554,8 +1560,28 @@ async function loginUser(username) {
 
 function logoutUser() {
   currentUser = null;
+  // Clear session from DB
+  if (window.dbExec) {
+    window.dbExec(`CREATE TABLE IF NOT EXISTS session (key VARCHAR PRIMARY KEY, value VARCHAR)`);
+    window.dbExec(`DELETE FROM session WHERE key = 'last_user'`);
+  }
   updateUserUI();
   refreshStats();
+}
+
+async function restoreLogin() {
+  if (!window.dbQuery) return false;
+  try {
+    await window.dbExec(`CREATE TABLE IF NOT EXISTS session (key VARCHAR PRIMARY KEY, value VARCHAR)`);
+    const rows = await window.dbQuery(`SELECT value FROM session WHERE key = 'last_user'`);
+    if (rows && rows.length > 0 && rows[0].value) {
+      currentUser = { name: rows[0].value };
+      updateUserUI();
+      console.log('Restored login from DB:', currentUser.name);
+      return true;
+    }
+  } catch(e) { console.error('Restore login failed:', e); }
+  return false;
 }
 
 function updateUserUI() {
@@ -2010,10 +2036,17 @@ async function aiTurn() {
   newGame(); // Start a default 2-player game (will be replaced when user picks mode)
   const overlay = document.getElementById('loading-overlay');
   overlay.style.opacity = '0';
-  setTimeout(() => {
+  setTimeout(async () => {
     overlay.style.display = 'none';
-    // Show login modal on first load
-    showLoginModal();
+    // Try to restore login from DuckDB first
+    const restored = await restoreLogin();
+    if (restored) {
+      // Already logged in — show game setup modal
+      document.getElementById('setup-modal').classList.remove('hidden');
+    } else {
+      // No saved session — show login modal
+      showLoginModal();
+    }
   }, 500);
 })();
 </script>
