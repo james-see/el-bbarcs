@@ -466,6 +466,14 @@ body{
       <h3>Tiles in Bag</h3>
       <div id="tile-count" style="font-size:.85rem;font-weight:600">100 / 100</div>
     </div>
+    <div class="panel" id="stats-panel">
+      <h3>Player Stats</h3>
+      <div id="player-stats" style="font-size:.75rem;color:var(--text-dim)">Loading...</div>
+    </div>
+    <div class="panel" id="history-panel">
+      <h3>Recent Games</h3>
+      <div id="game-history" style="font-size:.75rem;color:var(--text-dim)">No games yet</div>
+    </div>
   </div>
 
   <!-- Center: Board -->
@@ -538,6 +546,195 @@ body{
     <button class="btn btn-primary btn-lg" id="btn-play-again">Play Again</button>
   </div>
 </div>
+
+<!-- Game setup modal -->
+<div id="setup-modal" class="hidden modal-overlay">
+  <div class="modal-box" style="max-width:340px">
+    <h2 style="color:var(--text-bright);font-size:1.3rem;margin-bottom:12px">New Game</h2>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <button class="btn btn-lg setup-btn" data-mode="2player">2 Player Hot-Seat</button>
+      <button class="btn btn-lg setup-btn" data-mode="computer" data-diff="easy">vs Computer — Easy</button>
+      <button class="btn btn-lg setup-btn" data-mode="computer" data-diff="medium">vs Computer — Medium</button>
+      <button class="btn btn-lg setup-btn" data-mode="computer" data-diff="hard">vs Computer — Hard</button>
+    </div>
+    <button class="btn" id="setup-cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- AI thinking indicator -->
+<div id="ai-thinking" class="hidden" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg2);padding:16px 24px;border-radius:12px;border:1px solid var(--border-light);z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.4)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="spinner" style="width:20px;height:20px;border-width:3px"></div>
+    <span style="font-size:.85rem;color:var(--text-dim)">Computer is thinking...</span>
+  </div>
+</div>
+
+<script type="module">
+// ============================================================
+// DUCKDB-WASM PERSISTENCE LAYER (OPFS — survives history clear)
+// ============================================================
+import { AsyncDuckDB, getJsDelivrBundles, selectBundle, createWorker } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm';
+
+let db = null;
+let dbConn = null;
+let dbReady = false;
+
+async function initDB() {
+  try {
+    const bundles = getJsDelivrBundles();
+    const bundle = await selectBundle(bundles);
+    const worker = await createWorker(bundle.mainWorker);
+    const logger = { log: (e) => {} };
+    db = new AsyncDuckDB(logger, worker);
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    // Open with OPFS path — persists even when browser history/data is cleared
+    await db.open({ path: 'opfs://el-bbarcs.db', opfs: { fileHandling: 'auto' } });
+    dbConn = await db.connect();
+    await dbConn.query(`
+      CREATE TABLE IF NOT EXISTS players (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        games_played INTEGER DEFAULT 0,
+        games_won INTEGER DEFAULT 0,
+        total_score INTEGER DEFAULT 0,
+        best_word VARCHAR DEFAULT '',
+        best_word_score INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS games (
+        id INTEGER PRIMARY KEY,
+        player1_name VARCHAR,
+        player2_name VARCHAR,
+        player1_score INTEGER,
+        player2_score INTEGER,
+        winner VARCHAR,
+        played_at TIMESTAMP DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS word_history (
+        id INTEGER PRIMARY KEY,
+        player_name VARCHAR,
+        word VARCHAR,
+        score INTEGER,
+        played_at TIMESTAMP DEFAULT now()
+      );
+      CREATE SEQUENCE IF NOT EXISTS seq_players START 1;
+      CREATE SEQUENCE IF NOT EXISTS seq_games START 1;
+      CREATE SEQUENCE IF NOT EXISTS seq_words START 1;
+    `);
+    dbReady = true;
+    console.log('DuckDB-WASM initialized with OPFS persistence');
+    return true;
+  } catch(e) {
+    console.error('DuckDB init failed, falling back to in-memory:', e);
+    try {
+      // Fallback: in-memory (no persistence)
+      if (db) { await db.terminate(); db = null; }
+      const bundles = getJsDelivrBundles();
+      const bundle = await selectBundle(bundles);
+      const worker = await createWorker(bundle.mainWorker);
+      db = new AsyncDuckDB({log:()=>{}}, worker);
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+      await db.open({ path: ':memory:' });
+      dbConn = await db.connect();
+      await dbConn.query(`
+        CREATE TABLE IF NOT EXISTS players (
+          id INTEGER PRIMARY KEY, name VARCHAR NOT NULL,
+          games_played INTEGER DEFAULT 0, games_won INTEGER DEFAULT 0,
+          total_score INTEGER DEFAULT 0, best_word VARCHAR DEFAULT '',
+          best_word_score INTEGER DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS games (
+          id INTEGER PRIMARY KEY, player1_name VARCHAR, player2_name VARCHAR,
+          player1_score INTEGER, player2_score INTEGER, winner VARCHAR,
+          played_at TIMESTAMP DEFAULT now()
+        );
+        CREATE TABLE IF NOT EXISTS word_history (
+          id INTEGER PRIMARY KEY, player_name VARCHAR, word VARCHAR,
+          score INTEGER, played_at TIMESTAMP DEFAULT now()
+        );
+        CREATE SEQUENCE IF NOT EXISTS seq_players START 1;
+        CREATE SEQUENCE IF NOT EXISTS seq_games START 1;
+        CREATE SEQUENCE IF NOT EXISTS seq_words START 1;
+      `);
+      dbReady = true;
+      console.log('DuckDB-WASM initialized in-memory (no persistence)');
+      return true;
+    } catch(e2) {
+      console.error('DuckDB fallback also failed:', e2);
+      return false;
+    }
+  }
+}
+
+window.__db = { get ready() { return dbReady; }, conn: () => dbConn };
+
+// DB query helpers
+window.dbQuery = async function(sql) {
+  if (!dbReady || !dbConn) return null;
+  try {
+    const result = await dbConn.query(sql);
+    const rows = result.toArray().map(r => Object.fromEntries(Object.entries(r)));
+    return rows;
+  } catch(e) {
+    console.error('DB query error:', e, sql);
+    return null;
+  }
+};
+
+window.dbExec = async function(sql) {
+  if (!dbReady || !dbConn) return false;
+  try {
+    await dbConn.query(sql);
+    return true;
+  } catch(e) {
+    console.error('DB exec error:', e, sql);
+    return false;
+  }
+};
+
+// Record a completed game
+window.dbRecordGame = async function(p1Name, p2Name, p1Score, p2Score, winner) {
+  if (!dbReady) return;
+  await dbExec(`INSERT INTO games (id, player1_name, player2_name, player1_score, player2_score, winner) VALUES (nextval('seq_games'), '${p1Name}', '${p2Name}', ${p1Score}, ${p2Score}, '${winner}')`);
+  // Update player stats
+  for (const [name, score, won] of [[p1Name, p1Score, winner === p1Name], [p2Name, p2Score, winner === p2Name]]) {
+    const existing = await dbQuery(`SELECT id FROM players WHERE name = '${name}'`);
+    if (existing && existing.length > 0) {
+      await dbExec(`UPDATE players SET games_played = games_played + 1, games_won = games_won + ${won ? 1 : 0}, total_score = total_score + ${score} WHERE name = '${name}'`);
+    } else {
+      await dbExec(`INSERT INTO players (id, name, games_played, games_won, total_score) VALUES (nextval('seq_players'), '${name}', 1, ${won ? 1 : 0}, ${score})`);
+    }
+  }
+};
+
+// Record a word played
+window.dbRecordWord = async function(playerName, word, score) {
+  if (!dbReady) return;
+  await dbExec(`INSERT INTO word_history (id, player_name, word, score) VALUES (nextval('seq_words'), '${playerName}', '${word}', ${score})`);
+  // Update best word if applicable
+  const existing = await dbQuery(`SELECT best_word_score FROM players WHERE name = '${playerName}'`);
+  if (existing && existing.length > 0) {
+    if (score > (existing[0].best_word_score || 0)) {
+      await dbExec(`UPDATE players SET best_word = '${word}', best_word_score = ${score} WHERE name = '${playerName}'`);
+    }
+  }
+};
+
+// Get player stats for display
+window.dbGetStats = async function() {
+  if (!dbReady) return { players: [], games: [] };
+  const players = await dbQuery('SELECT name, games_played, games_won, total_score, best_word, best_word_score FROM players ORDER BY total_score DESC LIMIT 10');
+  const games = await dbQuery('SELECT player1_name, player2_name, player1_score, player2_score, winner, played_at FROM games ORDER BY played_at DESC LIMIT 5');
+  return { players: players || [], games: games || [] };
+};
+
+// Init DB on load
+initDB().then(() => {
+  console.log('DB init complete, ready:', dbReady);
+  if (typeof window.onDBReady === 'function') window.onDBReady();
+});
+
+</script>
 
 <script>
 'use strict';
@@ -969,6 +1166,12 @@ function playWord() {
   G.passCount = 0;
   clearPlacedTiles();
   refillRack(player);
+  // Record words to DuckDB
+  if (window.dbRecordWord) {
+    for (const w of result.words) {
+      window.dbRecordWord(player.name, w.word, w.score || result.score);
+    }
+  }
   nextTurn();
 }
 
@@ -1009,6 +1212,10 @@ function nextTurn() {
   clearPlacedTiles();
   renderAll();
   checkGameEnd();
+  // If it's the AI's turn, trigger it
+  if (aiOpponent && G.currentPlayer === aiOpponent.playerIdx && !G.gameOver) {
+    setTimeout(() => aiTurn(), 300);
+  }
 }
 
 function checkGameEnd() {
@@ -1036,6 +1243,15 @@ function endGame() {
   document.getElementById('final-scores').innerHTML = html;
   overlay.classList.remove('hidden');
   renderAll();
+
+  // Record game to DuckDB
+  if (window.dbRecordGame) {
+    const p1 = G.players[0], p2 = G.players[1];
+    const winnerName = tie ? 'Tie' : winner.name;
+    window.dbRecordGame(p1.name, p2.name, p1.score, p2.score, winnerName);
+  }
+  // Refresh stats display
+  refreshStats();
 }
 
 // ============================================================
@@ -1124,8 +1340,373 @@ document.getElementById('btn-pass').addEventListener('click', passTurn);
 document.getElementById('btn-shuffle').addEventListener('click', shuffleRack);
 document.getElementById('btn-exchange').addEventListener('click', showExchangeModal);
 document.getElementById('btn-recall').addEventListener('click', recallTiles);
-document.getElementById('btn-new-game').addEventListener('click', () => { if (confirm('Start a new game?')) newGame(); });
-document.getElementById('btn-play-again').addEventListener('click', newGame);
+document.getElementById('btn-new-game').addEventListener('click', () => {
+  document.getElementById('setup-modal').classList.remove('hidden');
+});
+document.getElementById('btn-play-again').addEventListener('click', () => {
+  document.getElementById('setup-modal').classList.remove('hidden');
+});
+document.getElementById('setup-cancel').addEventListener('click', () => {
+  document.getElementById('setup-modal').classList.add('hidden');
+});
+document.querySelectorAll('.setup-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    const diff = btn.dataset.diff;
+    document.getElementById('setup-modal').classList.add('hidden');
+    if (mode === '2player') {
+      aiOpponent = null;
+      newGame();
+    } else {
+      startAIGame(diff);
+    }
+  });
+});
+
+// ============================================================
+// STATS DISPLAY (from DuckDB)
+// ============================================================
+async function refreshStats() {
+  if (!window.dbGetStats) return;
+  const stats = await window.dbGetStats();
+  // Player stats
+  const statsEl = document.getElementById('player-stats');
+  if (statsEl) {
+    if (!stats || stats.players.length === 0) {
+      statsEl.innerHTML = '<span style="color:var(--text-dim)">No stats yet — play a game!</span>';
+    } else {
+      statsEl.innerHTML = stats.players.map(p =>
+        `<div style="margin:3px 0">
+          <span style="font-weight:600">${p.name}</span>
+          <span style="color:var(--text-dim)"> · ${p.games_played}G · ${p.games_won}W · ${p.total_score}pts</span>
+          ${p.best_word ? `<br><span style="font-size:.7rem;color:var(--gold-light)">Best: ${p.best_word} (${p.best_word_score})</span>` : ''}
+        </div>`
+      ).join('');
+    }
+  }
+  // Game history
+  const histEl = document.getElementById('game-history');
+  if (histEl) {
+    if (!stats || stats.games.length === 0) {
+      histEl.innerHTML = '<span style="color:var(--text-dim)">No games yet</span>';
+    } else {
+      histEl.innerHTML = stats.games.map(g => {
+        const date = g.played_at ? new Date(g.played_at).toLocaleDateString() : '';
+        return `<div style="margin:2px 0;font-size:.72rem">
+          <span style="color:var(--gold-light)">${g.winner}</span> won
+          ${g.player1_name}(${g.player1_score}) vs ${g.player2_name}(${g.player2_score})
+          <span style="color:var(--text-dim)">${date}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+window.onDBReady = function() {
+  refreshStats();
+};
+
+// ============================================================
+// AI OPPONENT
+// ============================================================
+let aiOpponent = null; // {difficulty: 'easy'|'medium'|'hard', playerIdx: 1}
+
+function startAIGame(difficulty) {
+  aiOpponent = {difficulty, playerIdx: 1};
+  G = {
+    board: [], bag: createBag(),
+    players: [
+      {id: 0, name: 'You', score: 0, rack: [], color: '#e94560'},
+      {id: 1, name: 'Computer (' + difficulty + ')', score: 0, rack: [], color: '#3fb950'}
+    ],
+    currentPlayer: 0, selectedTileIdx: null, placedTiles: [],
+    gameOver: false, passCount: 0,
+    dictionaryReady: G.dictionaryReady, dictionary: G.dictionary, lastMove: null
+  };
+  initBoard();
+  G.players.forEach(p => refillRack(p));
+  document.getElementById('game-over-overlay').classList.add('hidden');
+  renderAll();
+}
+
+// Build cross-check sets: for each empty cell, what letters are valid
+// based on existing tiles in the perpendicular direction?
+function buildCrossChecks() {
+  const checks = {};
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      if (isOccupied(r, c)) continue;
+      // Check vertical constraints (letters above/below)
+      let vWord = '', vStart = r;
+      while (vStart > 0 && isOccupied(vStart - 1, c)) vStart--;
+      let vEnd = r;
+      while (vEnd < BOARD_SIZE - 1 && isOccupied(vEnd + 1, c)) vEnd++;
+      if (vStart < r || vEnd > r) {
+        // There are tiles above or below — this cell has vertical constraints
+        let prefix = '';
+        for (let i = vStart; i < r; i++) prefix += getTileAt(i, c).letter;
+        let suffix = '';
+        for (let i = r + 1; i <= vEnd; i++) suffix += getTileAt(i, c).letter;
+        checks[r + ',' + c] = checks[r + ',' + c] || {h: null, v: null};
+        checks[r + ',' + c].v = {prefix, suffix};
+      }
+      // Check horizontal constraints
+      let hStart = c;
+      while (hStart > 0 && isOccupied(r, hStart - 1)) hStart--;
+      let hEnd = c;
+      while (hEnd < BOARD_SIZE - 1 && isOccupied(r, hEnd + 1)) hEnd++;
+      if (hStart < c || hEnd > c) {
+        checks[r + ',' + c] = checks[r + ',' + c] || {h: null, v: null};
+        let prefix = '';
+        for (let i = hStart; i < c; i++) prefix += getTileAt(r, i).letter;
+        let suffix = '';
+        for (let i = c + 1; i <= hEnd; i++) suffix += getTileAt(r, i).letter;
+        checks[r + ',' + c].h = {prefix, suffix};
+      }
+    }
+  }
+  return checks;
+}
+
+// Check if a letter is valid at a position given cross constraints
+function letterValidAt(checks, r, c, letter, isHorizontal) {
+  const check = checks[r + ',' + c];
+  if (!check) return true;
+  const constraint = isHorizontal ? check.v : check.h;
+  if (!constraint) return true;
+  const word = constraint.prefix + letter + constraint.suffix;
+  return isValidWord(word);
+}
+
+// Find all anchor squares (empty cells adjacent to occupied cells, or center for first move)
+function findAnchors() {
+  const isFirstMove = G.board.every(row => row.every(cell => cell === null));
+  if (isFirstMove) return [CENTER];
+
+  const anchors = new Set();
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      if (isOccupied(r, c)) continue;
+      const neighbors = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+      for (const [nr, nc] of neighbors) {
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && isOccupied(nr, nc)) {
+          anchors.add(r + ',' + c);
+          break;
+        }
+      }
+    }
+  }
+  return [...anchors].map(s => s.split(',').map(Number));
+}
+
+// Generate all possible moves for the AI
+function findAIMoves(rack) {
+  const anchors = findAnchors();
+  const checks = buildCrossChecks();
+  const moves = [];
+  const isFirstMove = G.board.every(row => row.every(cell => cell === null));
+
+  // For each anchor, try placing tiles horizontally and vertically
+  for (const [ar, ac] of anchors) {
+    // Try horizontal placement
+    tryDirection(rack, ar, ac, true, checks, moves, isFirstMove);
+    // Try vertical placement
+    tryDirection(rack, ar, ac, false, checks, moves, isFirstMove);
+  }
+
+  return moves;
+}
+
+function tryDirection(rack, anchorR, anchorC, isHorizontal, checks, moves, isFirstMove) {
+  const dr = isHorizontal ? 0 : 1;
+  const dc = isHorizontal ? 1 : 0;
+
+  // Try all possible starting positions (extend left/up from anchor)
+  const maxBack = isFirstMove ? 0 : 7;
+  for (let back = 0; back <= maxBack; back++) {
+    const startR = anchorR - dr * back;
+    const startC = anchorC - dc * back;
+    if (startR < 0 || startC < 0) continue;
+
+    // Try building a word from this position using rack tiles
+    buildWord(rack, startR, startC, dr, dc, '', [], 0, checks, moves, isHorizontal);
+  }
+}
+
+function buildWord(rack, r, c, dr, dc, currentWord, placedSoFar, depth, checks, moves, isHorizontal) {
+  if (depth > 7) return; // Max 7 tiles from rack
+  if (r >= BOARD_SIZE || c >= BOARD_SIZE) return;
+
+  // If this cell is occupied, extend the word with the existing tile
+  if (isOccupied(r, c)) {
+    const tile = getTileAt(r, c);
+    const newWord = currentWord + tile.letter;
+    // Continue to next cell
+    buildWord(rack, r + dr, c + dc, dr, dc, newWord, placedSoFar, depth, checks, moves, isHorizontal);
+    return;
+  }
+
+  // This cell is empty — try placing each rack tile here
+  const usedRackIndices = new Set(placedSoFar.map(p => p.rackIdx));
+
+  for (let i = 0; i < rack.length; i++) {
+    if (usedRackIndices.has(i)) continue;
+
+    const tile = rack[i];
+    const letter = tile.isBlank ? '?' : tile.letter;
+
+    // If blank, try all letters (but limit for performance)
+    const lettersToTry = tile.isBlank ? 'AEIOIRSTNLU' : tile.letter;
+
+    for (const tryLetter of lettersToTry) {
+      // Check cross constraints
+      if (!letterValidAt(checks, r, c, tryLetter, isHorizontal)) continue;
+
+      const newPlaced = [...placedSoFar, {
+        row: r, col: c,
+        letter: tryLetter,
+        value: tile.value,
+        isBlank: tile.isBlank,
+        rackIdx: i
+      }];
+      const newWord = currentWord + tryLetter;
+
+      // Check if this forms a valid word (at least 2 letters and uses at least one rack tile)
+      if (newWord.length >= 2 && isValidWord(newWord)) {
+        // Validate the full move (checks cross-words too)
+        const savedPlaced = G.placedTiles;
+        G.placedTiles = newPlaced;
+        const result = validateMove();
+        G.placedTiles = savedPlaced;
+        if (result.valid && result.score > 0) {
+          moves.push({tiles: newPlaced.map(p => ({...p})), word: newWord, score: result.score});
+        }
+      }
+
+      // Continue building longer words
+      buildWord(rack, r + dr, c + dc, dr, dc, newWord, newPlaced, depth + 1, checks, moves, isHorizontal);
+    }
+  }
+}
+
+function scoreMove(placedTiles) {
+  // Temporarily set placedTiles so validateMove/calculateScore can work
+  const savedPlaced = G.placedTiles;
+  G.placedTiles = placedTiles;
+  const words = findWordsFormed();
+  const score = calculateScore(words);
+  G.placedTiles = savedPlaced;
+  return score;
+}
+
+// AI move selection based on difficulty
+function selectAIMove(moves, difficulty) {
+  if (moves.length === 0) return null;
+
+  // Sort by score descending
+  moves.sort((a, b) => b.score - a.score);
+
+  if (difficulty === 'easy') {
+    // Easy: pick a random move from the bottom 60% of scores
+    const cutoff = Math.floor(moves.length * 0.6);
+    const pool = moves.slice(cutoff);
+    if (pool.length === 0) return moves[moves.length - 1];
+    return pool[Math.floor(Math.random() * pool.length)];
+  } else if (difficulty === 'medium') {
+    // Medium: pick from the middle 40% (not best, not worst)
+    const start = Math.floor(moves.length * 0.3);
+    const end = Math.floor(moves.length * 0.7);
+    const pool = moves.slice(start, Math.max(end, start + 1));
+    if (pool.length === 0) return moves[0];
+    return pool[Math.floor(Math.random() * pool.length)];
+  } else {
+    // Hard: pick the best move (highest score), with slight randomness for top 3
+    const top = moves.slice(0, Math.min(3, moves.length));
+    return top[Math.floor(Math.random() * top.length)];
+  }
+}
+
+// Execute AI turn
+async function aiTurn() {
+  if (G.gameOver) return;
+  if (!aiOpponent) return;
+
+  const player = G.players[aiOpponent.playerIdx];
+  if (G.currentPlayer !== aiOpponent.playerIdx) return;
+
+  // Show thinking indicator
+  document.getElementById('ai-thinking').classList.remove('hidden');
+
+  // Yield to let UI update
+  await new Promise(r => setTimeout(r, 100));
+
+  // Find moves
+  const moves = findAIMoves(player.rack);
+
+  // Select move based on difficulty
+  const move = selectAIMove(moves, aiOpponent.difficulty);
+
+  // Hide thinking indicator
+  document.getElementById('ai-thinking').classList.add('hidden');
+
+  if (!move) {
+    // No valid move — pass or exchange
+    if (G.bag.length > 0 && player.rack.length > 0 && Math.random() > 0.3) {
+      // Exchange worst tiles
+      const sorted = player.rack.map((t, i) => ({idx: i, val: t.value})).sort((a, b) => a.val - b.val);
+      const numExchange = Math.min(3, Math.ceil(sorted.length / 2));
+      const indices = sorted.slice(0, numExchange).map(s => s.idx).sort((a, b) => b - a);
+      for (const idx of indices) { G.bag.push(player.rack.splice(idx, 1)[0]); }
+      for (let i = G.bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [G.bag[i], G.bag[j]] = [G.bag[j], G.bag[i]]; }
+      refillRack(player);
+      G.passCount++;
+      showToast('Computer exchanged tiles');
+      if (G.passCount >= 4) { endGame(); return; }
+      nextTurn();
+    } else {
+      // Pass
+      G.passCount++;
+      showToast('Computer passed');
+      if (G.passCount >= 4) { endGame(); return; }
+      nextTurn();
+    }
+    return;
+  }
+
+  // Execute the move
+  // Remove tiles from rack first, then set placedTiles
+  const indices = move.tiles.map(t => t.rackIdx).sort((a, b) => b - a);
+  for (const idx of indices) { player.rack.splice(idx, 1); }
+
+  // Set placed tiles for validation
+  G.placedTiles = move.tiles.map(t => ({
+    row: t.row, col: t.col, letter: t.letter, value: t.value, isBlank: t.isBlank, rackIdx: 0
+  }));
+
+  // Validate and play
+  const result = validateMove();
+  if (result.valid) {
+    player.score += result.score;
+    commitPlacedTilesToBoard(player.id);
+    G.lastMove = { player: player.name, color: player.color, words: result.words.map(w => w.word), score: result.score };
+    G.passCount = 0;
+    if (window.dbRecordWord) {
+      for (const w of result.words) {
+        window.dbRecordWord(player.name, w.word, w.score || result.score);
+      }
+    }
+    showToast('Computer played: ' + result.words.map(w => w.word).join(', ') + ' (+' + result.score + ')', 'success');
+  } else {
+    // Validation failed — shouldn't happen but pass as fallback
+    G.passCount++;
+    showToast('Computer passed');
+    if (G.passCount >= 4) { endGame(); return; }
+  }
+
+  clearPlacedTiles();
+  refillRack(player);
+  nextTurn();
+}
 
 // ============================================================
 // BOOT
@@ -1141,10 +1722,14 @@ document.getElementById('btn-play-again').addEventListener('click', newGame);
     loadingText.textContent = 'Warning: Dictionary failed to load — words will not be validated';
     console.error('Dictionary load failed:', e);
   }
-  newGame();
+  newGame(); // Start a default 2-player game (will be replaced when user picks mode)
   const overlay = document.getElementById('loading-overlay');
   overlay.style.opacity = '0';
-  setTimeout(() => overlay.style.display = 'none', 500);
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    // Show setup modal on first load
+    document.getElementById('setup-modal').classList.remove('hidden');
+  }, 500);
 })();
 </script>
 </body>
