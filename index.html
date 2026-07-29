@@ -1112,7 +1112,18 @@ function onRackTileClick(idx) {
 function onCellClick(row, col) {
   if (G.gameOver) return;
   const placedIdx = G.placedTiles.findIndex(t => t.row === row && t.col === col);
-  if (placedIdx >= 0) { G.placedTiles.splice(placedIdx, 1); renderBoard(); return; }
+  if (placedIdx >= 0) {
+    // Return the tile to the rack before removing from board
+    const removed = G.placedTiles.splice(placedIdx, 1)[0];
+    const player = G.players[G.currentPlayer];
+    player.rack.push({
+      letter: removed.isBlank ? '' : removed.letter,
+      value: removed.value,
+      isBlank: removed.isBlank
+    });
+    renderAll();
+    return;
+  }
   if (isOccupied(row, col)) return;
   if (G.selectedTileIdx === null) { showToast('Select a tile from your rack first', 'error'); return; }
 
@@ -1190,7 +1201,12 @@ function recallTiles() {
   if (G.placedTiles.length === 0) return;
   const player = G.players[G.currentPlayer];
   for (const t of G.placedTiles) {
-    player.rack.push({ letter: t.isBlank ? '' : t.letter, value: t.value, isBlank: t.isBlank });
+    // Return tile to rack — blanks go back as blanks (no letter)
+    player.rack.push({
+      letter: t.isBlank ? '' : t.letter,
+      value: t.value,
+      isBlank: t.isBlank
+    });
   }
   clearPlacedTiles();
   G.selectedTileIdx = null;
