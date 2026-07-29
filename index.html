@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>El-Bbarcs — Free Open-Source Word Board Game</title>
-<meta name="description" content="El-Bbarcs is a free, open-source word board game you play in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word and Quad Letter bonuses. No backend, no signup — just play.">
+<meta name="description" content="El-Bbarcs is a free, open-source word board game you play in your browser. 15×15 grid, 100 tiles, 178K word dictionary, exclusive Quad Word and Quad Letter bonuses. No backend, no signup — just play.">
 <meta name="keywords" content="word game, scrabble alternative, open source board game, browser game, free word game, el-bbarcs, quad word, quad letter, online scrabble, word board game, github pages game">
 <meta name="author" content="James Campbell">
 <meta name="theme-color" content="#0d1117">
@@ -15,7 +15,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://james-see.github.io/el-bbarcs/">
 <meta property="og:title" content="El-Bbarcs — Free Open-Source Word Board Game">
-<meta property="og:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
+<meta property="og:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 178K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
 <meta property="og:site_name" content="El-Bbarcs">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://james-see.github.io/el-bbarcs/og-image.png">
@@ -27,7 +27,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://james-see.github.io/el-bbarcs/">
 <meta name="twitter:title" content="El-Bbarcs — Free Open-Source Word Board Game">
-<meta name="twitter:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
+<meta name="twitter:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 178K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
 <meta name="twitter:image" content="https://james-see.github.io/el-bbarcs/og-image.png">
 <meta name="twitter:creator" content="@james">
 
@@ -46,7 +46,7 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "El-Bbarcs",
-  "description": "A free, open-source word board game played in the browser. Features a 15×15 grid with 100 tiles, a 359,000-word dictionary, and exclusive Quad Word (4×) and Quad Letter (4×) bonus squares not found in standard word games.",
+  "description": "A free, open-source word board game played in the browser. Features a 15×15 grid with 100 tiles, a 178,000-word dictionary, and exclusive Quad Word (4×) and Quad Letter (4×) bonus squares not found in standard word games.",
   "url": "https://james-see.github.io/el-bbarcs/",
   "applicationCategory": "Game",
   "operatingSystem": "Any (web browser)",
@@ -78,7 +78,7 @@
       "name": "What is El-Bbarcs?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "El-Bbarcs is a free, open-source word board game that runs entirely in your web browser. It is inspired by Scrabble and Words With Friends but adds exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game uses a 15×15 grid board with 100 letter tiles and a built-in dictionary of 359,039 English words. No backend server, no signup, and no tracking — everything runs client-side."
+        "text": "El-Bbarcs is a free, open-source word board game that runs entirely in your web browser. It is inspired by Scrabble and Words With Friends but adds exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game uses a 15×15 grid board with 100 letter tiles and a built-in dictionary of 178,691 English words. No backend server, no signup, and no tracking — everything runs client-side."
       }
     },
     {
@@ -94,7 +94,7 @@
       "name": "How many words are in the El-Bbarcs dictionary?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The El-Bbarcs dictionary contains 359,039 English words ranging from 2 to 15 letters. The word list is derived from the dwyl/english-words open-source project and is loaded entirely in the browser — no API calls or server lookups are needed during gameplay."
+        "text": "The El-Bbarcs dictionary contains 178,691 English words ranging from 2 to 15 letters. The word list is derived from the NASPA NWL2020 Scrabble tournament word list and is loaded entirely in the browser — no API calls or server lookups are needed during gameplay."
       }
     },
     {
@@ -436,7 +436,7 @@ body{
 <!-- SEO noscript fallback -->
 <noscript>
 <h1>El-Bbarcs — Free Open-Source Word Board Game</h1>
-<p>El-Bbarcs is a free, open-source word board game inspired by Scrabble and Words With Friends. It features a 15×15 grid with 100 letter tiles, a 359,039-word dictionary, and exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game runs entirely in your browser with no backend server, no signup, and no tracking.</p>
+<p>El-Bbarcs is a free, open-source word board game inspired by Scrabble and Words With Friends. It features a 15×15 grid with 100 letter tiles, a 178,691-word dictionary, and exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game runs entirely in your browser with no backend server, no signup, and no tracking.</p>
 <p><a href="https://github.com/james-see/el-bbarcs">View source code on GitHub</a></p>
 <p>To play, please enable JavaScript in your browser.</p>
 </noscript>
@@ -1714,7 +1714,7 @@ async function aiTurn() {
 (async function() {
   const loadingText = document.getElementById('loading-text');
   try {
-    loadingText.textContent = 'Loading El-Bbarcs dictionary (359K words)...';
+    loadingText.textContent = 'Loading El-Bbarcs dictionary (178K words)...';
     const wordCount = await loadDictionary();
     loadingText.textContent = 'Dictionary loaded: ' + wordCount + ' words';
     console.log('Dictionary loaded:', wordCount, 'words');

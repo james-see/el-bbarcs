@@ -9,7 +9,7 @@ El-Bbarcs is a browser-native word board game inspired by Scrabble and Words Wit
 Key facts:
 - **Board**: 15×15 grid (same as standard word games)
 - **Tiles**: 100 letter tiles with standard distribution (A=9, E=12, blanks=2, etc.)
-- **Dictionary**: 359,039 English words (2-15 letters), loaded client-side via fetch()
+- **Dictionary**: 178,691 English words (2-15 letters), loaded client-side via fetch()
 - **Players**: 2-player hot-seat mode (pass-and-play on one device)
 - **Exclusive bonuses**: Quad Word (QW) = 4× word score, Quad Letter (QL) = 4× letter score
 - **Standard bonuses**: Triple Word (8 squares), Double Word (16), Triple Letter (12), Double Letter (22)
@@ -18,7 +18,7 @@ Key facts:
 - **Tile exchange**: Swap tiles back to the bag (costs your turn)
 - **Tech stack**: Pure HTML/CSS/JS in a single file, zero dependencies, no build step
 - **Hosting**: GitHub Pages (free, static)
-- **Word list source**: [dwyl/english-words](https://github.com/dwyl/english-words) (filtered to 2-15 letters)
+- **Word list source**: NASPA NWL2020 Scrabble tournament word list (filtered to 2-15 letters)
 
 ## How to play
 
