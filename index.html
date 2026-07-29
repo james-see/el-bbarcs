@@ -618,86 +618,113 @@ async function initDB() {
     const logger = { log: (e) => {} };
     db = new AsyncDuckDB(logger, worker);
     await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    // Open with OPFS path — persists even when browser history/data is cleared
-    await db.open({ path: 'opfs://el-bbarcs.db', opfs: { fileHandling: 'auto' } });
+    // Always use in-memory — we persist via OPFS JSON separately
+    await db.open({ path: ':memory:' });
     dbConn = await db.connect();
     await dbConn.query(`
       CREATE TABLE IF NOT EXISTS players (
-        id INTEGER PRIMARY KEY,
-        name VARCHAR NOT NULL,
-        games_played INTEGER DEFAULT 0,
-        games_won INTEGER DEFAULT 0,
-        total_score INTEGER DEFAULT 0,
-        best_word VARCHAR DEFAULT '',
-        best_word_score INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT now()
+        id INTEGER PRIMARY KEY, name VARCHAR NOT NULL,
+        games_played INTEGER DEFAULT 0, games_won INTEGER DEFAULT 0,
+        total_score INTEGER DEFAULT 0, best_word VARCHAR DEFAULT '',
+        best_word_score INTEGER DEFAULT 0
       );
       CREATE TABLE IF NOT EXISTS games (
-        id INTEGER PRIMARY KEY,
-        player1_name VARCHAR,
-        player2_name VARCHAR,
-        player1_score INTEGER,
-        player2_score INTEGER,
-        winner VARCHAR,
+        id INTEGER PRIMARY KEY, player1_name VARCHAR, player2_name VARCHAR,
+        player1_score INTEGER, player2_score INTEGER, winner VARCHAR,
         played_at TIMESTAMP DEFAULT now()
       );
       CREATE TABLE IF NOT EXISTS word_history (
-        id INTEGER PRIMARY KEY,
-        player_name VARCHAR,
-        word VARCHAR,
-        score INTEGER,
-        played_at TIMESTAMP DEFAULT now()
+        id INTEGER PRIMARY KEY, player_name VARCHAR, word VARCHAR,
+        score INTEGER, played_at TIMESTAMP DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS session (
+        key VARCHAR PRIMARY KEY, value VARCHAR
       );
       CREATE SEQUENCE IF NOT EXISTS seq_players START 1;
       CREATE SEQUENCE IF NOT EXISTS seq_games START 1;
       CREATE SEQUENCE IF NOT EXISTS seq_words START 1;
     `);
     dbReady = true;
-    console.log('DuckDB-WASM initialized with OPFS persistence');
+    // Load persisted data from OPFS into the in-memory DB
+    await loadFromOPFS();
+    console.log('DuckDB-WASM initialized (in-memory + OPFS persistence)');
     return true;
   } catch(e) {
-    console.error('DuckDB init failed, falling back to in-memory:', e);
-    try {
-      // Fallback: in-memory (no persistence)
-      if (db) { await db.terminate(); db = null; }
-      const bundles = getJsDelivrBundles();
-      const bundle = await selectBundle(bundles);
-      const worker = await createWorker(bundle.mainWorker);
-      db = new AsyncDuckDB({log:()=>{}}, worker);
-      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-      await db.open({ path: ':memory:' });
-      dbConn = await db.connect();
-      await dbConn.query(`
-        CREATE TABLE IF NOT EXISTS players (
-          id INTEGER PRIMARY KEY, name VARCHAR NOT NULL,
-          games_played INTEGER DEFAULT 0, games_won INTEGER DEFAULT 0,
-          total_score INTEGER DEFAULT 0, best_word VARCHAR DEFAULT '',
-          best_word_score INTEGER DEFAULT 0
-        );
-        CREATE TABLE IF NOT EXISTS games (
-          id INTEGER PRIMARY KEY, player1_name VARCHAR, player2_name VARCHAR,
-          player1_score INTEGER, player2_score INTEGER, winner VARCHAR,
-          played_at TIMESTAMP DEFAULT now()
-        );
-        CREATE TABLE IF NOT EXISTS word_history (
-          id INTEGER PRIMARY KEY, player_name VARCHAR, word VARCHAR,
-          score INTEGER, played_at TIMESTAMP DEFAULT now()
-        );
-        CREATE SEQUENCE IF NOT EXISTS seq_players START 1;
-        CREATE SEQUENCE IF NOT EXISTS seq_games START 1;
-        CREATE SEQUENCE IF NOT EXISTS seq_words START 1;
-      `);
-      dbReady = true;
-      console.log('DuckDB-WASM initialized in-memory (no persistence)');
-      return true;
-    } catch(e2) {
-      console.error('DuckDB fallback also failed:', e2);
-      return false;
+    console.error('DuckDB init failed:', e);
+    return false;
+  }
+}
+
+// OPFS persistence — save/load the DB data as JSON in the Origin Private File System
+// This survives browser history clears, cache clears, and page refreshes
+async function saveToOPFS() {
+  if (!dbReady || !dbConn) return;
+  try {
+    const root = await navigator.storage.getDirectory();
+    const fileHandle = await root.getFileHandle('el-bbarcs-data.json', { create: true });
+    const writable = await fileHandle.createWritable();
+    // Dump all tables as JSON
+    const players = await dbQuery('SELECT * FROM players');
+    const games = await dbQuery('SELECT * FROM games');
+    const words = await dbQuery('SELECT * FROM word_history');
+    const session = await dbQuery('SELECT * FROM session');
+    const data = JSON.stringify({ players: players || [], games: games || [], words: words || [], session: session || [] });
+    await writable.write(data);
+    await writable.close();
+    console.log('Saved to OPFS:', (players||[]).length, 'players,', (games||[]).length, 'games');
+  } catch(e) {
+    console.error('OPFS save failed:', e);
+  }
+}
+
+async function loadFromOPFS() {
+  try {
+    const root = await navigator.storage.getDirectory();
+    const fileHandle = await root.getFileHandle('el-bbarcs-data.json');
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    const data = JSON.parse(text);
+    // Restore session
+    if (data.session) {
+      for (const row of data.session) {
+        await dbExec(`INSERT INTO session (key, value) VALUES ('${row.key}', '${row.value}')`);
+      }
     }
+    // Restore players
+    if (data.players) {
+      for (const p of data.players) {
+        await dbExec(`INSERT INTO players (id, name, games_played, games_won, total_score, best_word, best_word_score) VALUES (${p.id}, '${p.name}', ${p.games_played}, ${p.games_won}, ${p.total_score}, '${p.best_word || ''}', ${p.best_word_score || 0})`);
+      }
+      // Reset sequence to max id + 1
+      const maxId = data.players.reduce((m, p) => Math.max(m, p.id), 0);
+      await dbExec(`ALTER SEQUENCE seq_players RESTART WITH ${maxId + 1}`);
+    }
+    // Restore games
+    if (data.games) {
+      for (const g of data.games) {
+        await dbExec(`INSERT INTO games (id, player1_name, player2_name, player1_score, player2_score, winner) VALUES (${g.id}, '${g.player1_name}', '${g.player2_name}', ${g.player1_score}, ${g.player2_score}, '${g.winner}')`);
+      }
+      const maxId = data.games.reduce((m, g) => Math.max(m, g.id), 0);
+      await dbExec(`ALTER SEQUENCE seq_games RESTART WITH ${maxId + 1}`);
+    }
+    // Restore word history
+    if (data.words) {
+      for (const w of data.words) {
+        await dbExec(`INSERT INTO word_history (id, player_name, word, score) VALUES (${w.id}, '${w.player_name}', '${w.word}', ${w.score})`);
+      }
+      const maxId = data.words.reduce((m, w) => Math.max(m, w.id), 0);
+      await dbExec(`ALTER SEQUENCE seq_words RESTART WITH ${maxId + 1}`);
+    }
+    console.log('Loaded from OPFS:', (data.players||[]).length, 'players,', (data.games||[]).length, 'games');
+  } catch(e) {
+    // File doesn't exist yet — first run, nothing to load
+    console.log('No OPFS data to load (first run)');
   }
 }
 
 window.__db = { get ready() { return dbReady; }, conn: () => dbConn };
+window.saveToOPFS = saveToOPFS;
+window.loadFromOPFS = loadFromOPFS;
 
 // DB query helpers
 window.dbQuery = async function(sql) {
@@ -1383,6 +1410,7 @@ async function endGame() {
     // For AI games, use generic "Computer" as p2 name so we don't create per-difficulty player records
     const p2Name = aiOpponent ? 'Computer' : p2.name;
     await window.dbRecordGame(p1.name, p2Name, p1.score, p2.score, winnerName);
+    await window.saveToOPFS();
   }
   // Refresh stats display after DB write completes
   await refreshStats();
@@ -1550,9 +1578,10 @@ async function loginUser(username) {
   }
 
   currentUser = { name: username };
-  // Persist last logged-in user in DuckDB so it survives refresh
+  // Persist last logged-in user in DuckDB + OPFS
   await window.dbExec(`CREATE TABLE IF NOT EXISTS session (key VARCHAR PRIMARY KEY, value VARCHAR)`);
   await window.dbExec(`INSERT OR REPLACE INTO session (key, value) VALUES ('last_user', '${username}')`);
+  await window.saveToOPFS();
   updateUserUI();
   refreshStats();
   return true;
@@ -1560,10 +1589,11 @@ async function loginUser(username) {
 
 function logoutUser() {
   currentUser = null;
-  // Clear session from DB
+  // Clear session from DB + OPFS
   if (window.dbExec) {
     window.dbExec(`CREATE TABLE IF NOT EXISTS session (key VARCHAR PRIMARY KEY, value VARCHAR)`);
     window.dbExec(`DELETE FROM session WHERE key = 'last_user'`);
+    if (window.saveToOPFS) window.saveToOPFS();
   }
   updateUserUI();
   refreshStats();
