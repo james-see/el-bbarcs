@@ -236,6 +236,7 @@ body{
   position:relative;cursor:pointer;user-select:none;
   box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);
   font-family:'SF Pro Display',-apple-system,sans-serif;
+  pointer-events:none;
 }
 .tile .letter{font-size:var(--tile-font);line-height:1;font-weight:800}
 .tile .value{
@@ -1176,7 +1177,6 @@ function renderAll() {
 function handleDropFromRack(rackIdx, row, col) {
   if (G.gameOver) return;
   if (isOccupied(row, col)) return;
-  // Check if there's already a placed tile at this position — if so, return it first
   const existingPlaced = G.placedTiles.findIndex(t => t.row === row && t.col === col);
   if (existingPlaced >= 0) return;
 
@@ -1195,7 +1195,8 @@ function handleDropFromRack(rackIdx, row, col) {
     placeTileOnBoard(row, col, tile, rackIdx);
     player.rack.splice(rackIdx, 1);
     G.selectedTileIdx = null;
-    renderAll();
+    // Defer render to next tick so dragend fires first
+    setTimeout(() => renderAll(), 0);
   }
 }
 
@@ -1203,18 +1204,15 @@ function handleDropFromBoard(fromRow, fromCol, toRow, toCol) {
   if (G.gameOver) return;
   if (fromRow === toRow && fromCol === toCol) return;
   if (isOccupied(toRow, toCol)) return;
-  // Check target isn't already a placed tile
   const existingPlaced = G.placedTiles.findIndex(t => t.row === toRow && t.col === toCol);
   if (existingPlaced >= 0) return;
 
-  // Find the placed tile being dragged
   const placedIdx = G.placedTiles.findIndex(t => t.row === fromRow && t.col === fromCol);
   if (placedIdx < 0) return;
 
-  // Move it to the new position
   G.placedTiles[placedIdx].row = toRow;
   G.placedTiles[placedIdx].col = toCol;
-  renderAll();
+  setTimeout(() => renderAll(), 0);
 }
 
 // ============================================================
@@ -1491,7 +1489,6 @@ rackEl.addEventListener('drop', (e) => {
   try {
     const data = JSON.parse(e.dataTransfer.getData('text/plain'));
     if (data.source === 'board') {
-      // Return the placed tile to the rack
       const placedIdx = G.placedTiles.findIndex(t => t.row === data.row && t.col === data.col);
       if (placedIdx >= 0) {
         const removed = G.placedTiles.splice(placedIdx, 1)[0];
@@ -1501,7 +1498,7 @@ rackEl.addEventListener('drop', (e) => {
           value: removed.value,
           isBlank: removed.isBlank
         });
-        renderAll();
+        setTimeout(() => renderAll(), 0);
       }
     }
   } catch(err) { console.error('Rack drop error:', err); }
