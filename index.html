@@ -726,6 +726,43 @@ window.__db = { get ready() { return dbReady; }, conn: () => dbConn };
 window.saveToOPFS = saveToOPFS;
 window.loadFromOPFS = loadFromOPFS;
 
+// Game state persistence via OPFS (separate file from DB data)
+window.saveGameState = async function(state) {
+  try {
+    const root = await navigator.storage.getDirectory();
+    const fileHandle = await root.getFileHandle('el-bbarcs-game.json', { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(state));
+    await writable.close();
+    console.log('Game state saved to OPFS');
+  } catch(e) {
+    console.error('Game state save failed:', e);
+  }
+};
+
+window.loadGameState = async function() {
+  try {
+    const root = await navigator.storage.getDirectory();
+    const fileHandle = await root.getFileHandle('el-bbarcs-game.json');
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    const state = JSON.parse(text);
+    console.log('Game state loaded from OPFS');
+    return state;
+  } catch(e) {
+    console.log('No saved game state (first run or no game in progress)');
+    return null;
+  }
+};
+
+window.clearGameState = async function() {
+  try {
+    const root = await navigator.storage.getDirectory();
+    await root.removeEntry('el-bbarcs-game.json');
+    console.log('Game state cleared');
+  } catch(e) { /* file doesn't exist, fine */ }
+};
+
 // DB query helpers
 window.dbQuery = async function(sql) {
   if (!dbReady || !dbConn) return null;
@@ -1371,6 +1408,8 @@ function nextTurn() {
   clearPlacedTiles();
   renderAll();
   checkGameEnd();
+  // Save game state for refresh persistence
+  saveGameStateNow();
   // If it's the AI's turn, trigger it
   if (aiOpponent && G.currentPlayer === aiOpponent.playerIdx && !G.gameOver) {
     setTimeout(() => aiTurn(), 300);
@@ -1414,6 +1453,8 @@ async function endGame() {
   }
   // Refresh stats display after DB write completes
   await refreshStats();
+  // Clear saved game state since game is over
+  if (window.clearGameState) await window.clearGameState();
 }
 
 // ============================================================
@@ -1475,6 +1516,65 @@ function showToast(msg, type) {
 }
 
 // ============================================================
+// GAME STATE SAVE/RESTORE
+// ============================================================
+function saveGameStateNow() {
+  if (!window.saveGameState) return;
+  // Don't save if game is over or no moves made
+  if (G.gameOver) {
+    if (window.clearGameState) window.clearGameState();
+    return;
+  }
+  if (G.board.every(row => row.every(cell => cell === null))) return;
+  const state = {
+    board: G.board,
+    bag: G.bag,
+    players: G.players.map(p => ({ id: p.id, name: p.name, score: p.score, rack: p.rack, color: p.color })),
+    currentPlayer: G.currentPlayer,
+    passCount: G.passCount,
+    gameOver: G.gameOver,
+    lastMove: G.lastMove,
+    aiOpponent: aiOpponent ? aiOpponent.difficulty : null
+  };
+  window.saveGameState(state);
+}
+
+async function restoreGameState() {
+  if (!window.loadGameState) return false;
+  const state = await window.loadGameState();
+  if (!state || !state.board || state.board.length === 0) return false;
+  // Check if game is still in progress (has tiles on board)
+  const hasTiles = state.board.some(row => row.some(cell => cell !== null));
+  if (!hasTiles) return false;
+
+  // Restore game state
+  aiOpponent = state.aiOpponent ? {difficulty: state.aiOpponent, playerIdx: 1} : null;
+  G = {
+    board: state.board,
+    bag: state.bag,
+    players: state.players,
+    currentPlayer: state.currentPlayer,
+    selectedTileIdx: null,
+    placedTiles: [],
+    gameOver: state.gameOver || false,
+    passCount: state.passCount || 0,
+    dictionaryReady: G.dictionaryReady,
+    dictionary: G.dictionary,
+    lastMove: state.lastMove
+  };
+  document.getElementById('game-over-overlay').classList.add('hidden');
+  renderAll();
+  console.log('Restored game in progress');
+  showToast('Restored your game in progress', 'success');
+
+  // If it's the AI's turn, trigger it
+  if (aiOpponent && G.currentPlayer === aiOpponent.playerIdx && !G.gameOver) {
+    setTimeout(() => aiTurn(), 500);
+  }
+  return true;
+}
+
+// ============================================================
 // GAME INITIALIZATION
 // ============================================================
 function newGame() {
@@ -1493,6 +1593,8 @@ function newGame() {
   G.players.forEach(p => refillRack(p));
   document.getElementById('game-over-overlay').classList.add('hidden');
   renderAll();
+  // Clear any saved game state since we're starting fresh
+  if (window.clearGameState) window.clearGameState();
 }
 
 // ============================================================
@@ -1768,6 +1870,8 @@ function startAIGame(difficulty) {
   G.players.forEach(p => refillRack(p));
   document.getElementById('game-over-overlay').classList.add('hidden');
   renderAll();
+  // Clear old saved game state since we're starting fresh
+  if (window.clearGameState) window.clearGameState();
 }
 
 // Build cross-check sets: for each empty cell, what letters are valid
@@ -2063,7 +2167,7 @@ async function aiTurn() {
     loadingText.textContent = 'Warning: Dictionary failed to load — words will not be validated';
     console.error('Dictionary load failed:', e);
   }
-  newGame(); // Start a default 2-player game (will be replaced when user picks mode)
+  newGame(); // Start a default 2-player game (will be replaced if we restore)
   const overlay = document.getElementById('loading-overlay');
   overlay.style.opacity = '0';
   setTimeout(async () => {
@@ -2077,8 +2181,11 @@ async function aiTurn() {
     // Try to restore login from DuckDB
     const restored = await restoreLogin();
     if (restored) {
-      // Already logged in — don't show any modal, just let them play
-      // If they want a new game they click New Game
+      // Try to restore an in-progress game
+      const gameRestored = await restoreGameState();
+      if (!gameRestored) {
+        // No game in progress, don't show modals — let them click New Game
+      }
     } else {
       // No saved session — show login modal
       showLoginModal();
