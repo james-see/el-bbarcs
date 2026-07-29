@@ -1646,7 +1646,7 @@ document.getElementById('login-confirm').addEventListener('click', async () => {
   if (success) {
     hideLoginModal();
     showToast('Logged in as ' + currentUser.name, 'success');
-    // Show game setup modal after login
+    // Show game setup modal after active login (not refresh restore)
     document.getElementById('setup-modal').classList.remove('hidden');
   } else {
     showToast('Please enter a valid username', 'error');
@@ -2038,11 +2038,17 @@ async function aiTurn() {
   overlay.style.opacity = '0';
   setTimeout(async () => {
     overlay.style.display = 'none';
-    // Try to restore login from DuckDB first
+    // Wait for DuckDB to be ready (it loads in a separate module script)
+    let dbWaited = 0;
+    while (!window.__db?.ready && dbWaited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      dbWaited += 100;
+    }
+    // Try to restore login from DuckDB
     const restored = await restoreLogin();
     if (restored) {
-      // Already logged in — show game setup modal
-      document.getElementById('setup-modal').classList.remove('hidden');
+      // Already logged in — don't show any modal, just let them play
+      // If they want a new game they click New Game
     } else {
       // No saved session — show login modal
       showLoginModal();
