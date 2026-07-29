@@ -2,177 +2,426 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>El-Bbarcs — Open Word Board Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>El-Bbarcs — Free Open-Source Word Board Game</title>
+<meta name="description" content="El-Bbarcs is a free, open-source word board game you play in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word and Quad Letter bonuses. No backend, no signup — just play.">
+<meta name="keywords" content="word game, scrabble alternative, open source board game, browser game, free word game, el-bbarcs, quad word, quad letter, online scrabble, word board game, github pages game">
+<meta name="author" content="James Campbell">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://james-see.github.io/el-bbarcs/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://james-see.github.io/el-bbarcs/">
+<meta property="og:title" content="El-Bbarcs — Free Open-Source Word Board Game">
+<meta property="og:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
+<meta property="og:site_name" content="El-Bbarcs">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://james-see.github.io/el-bbarcs/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="El-Bbarcs — Free Open-Source Word Board Game">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://james-see.github.io/el-bbarcs/">
+<meta name="twitter:title" content="El-Bbarcs — Free Open-Source Word Board Game">
+<meta name="twitter:description" content="Play a free word board game in your browser. 15×15 grid, 100 tiles, 359K word dictionary, exclusive Quad Word & Quad Letter bonuses. No backend, no signup.">
+<meta name="twitter:image" content="https://james-see.github.io/el-bbarcs/og-image.png">
+<meta name="twitter:creator" content="@james">
+
+<!-- Mobile / PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="El-Bbarcs">
+
+<!-- AI/LLM Discovery (GEO) -->
+<link rel="llms" type="text/plain" href="https://james-see.github.io/el-bbarcs/llms.txt">
+<link rel="alternate" type="application/json" href="https://james-see.github.io/el-bbarcs/game-data.json" title="El-Bbarcs Game Data (JSON)">
+
+<!-- Structured Data: WebApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "El-Bbarcs",
+  "description": "A free, open-source word board game played in the browser. Features a 15×15 grid with 100 tiles, a 359,000-word dictionary, and exclusive Quad Word (4×) and Quad Letter (4×) bonus squares not found in standard word games.",
+  "url": "https://james-see.github.io/el-bbarcs/",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any (web browser)",
+  "browserRequirements": "Requires JavaScript and a modern web browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "James Campbell",
+    "url": "https://github.com/james-see"
+  },
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "keywords": ["word game", "board game", "scrabble alternative", "open source", "browser game", "quad word", "quad letter"]
+}
+</script>
+
+<!-- Structured Data: FAQPage for AI citation -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is El-Bbarcs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El-Bbarcs is a free, open-source word board game that runs entirely in your web browser. It is inspired by Scrabble and Words With Friends but adds exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game uses a 15×15 grid board with 100 letter tiles and a built-in dictionary of 359,039 English words. No backend server, no signup, and no tracking — everything runs client-side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is El-Bbarcs different from Scrabble?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El-Bbarcs uses the same 15×15 board size and 100-tile distribution as standard word games, but introduces two exclusive bonus square types: Quad Word (QW) which multiplies the word score by 4× (vs Scrabble's max 3× Triple Word), and Quad Letter (QL) which multiplies a letter's value by 4× (vs Scrabble's max 3× Triple Letter). There are 4 QW squares and 8 QL squares on the board. El-Bbarcs is also completely free and open source under the MIT license."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many words are in the El-Bbarcs dictionary?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The El-Bbarcs dictionary contains 359,039 English words ranging from 2 to 15 letters. The word list is derived from the dwyl/english-words open-source project and is loaded entirely in the browser — no API calls or server lookups are needed during gameplay."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is El-Bbarcs free to play?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, El-Bbarcs is completely free with no ads, no signup, and no tracking. It is open source under the MIT license and hosted on GitHub Pages at https://james-see.github.io/el-bbarcs/. The source code is available at https://github.com/james-see/el-bbarcs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I play El-Bbarcs on mobile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, El-Bbarcs is fully responsive and works on mobile phones, tablets, and desktop computers. The board and tiles automatically resize to fit any screen using CSS clamp() functions. On mobile, the layout switches to a vertical stack with the board, rack, and controls arranged for touch interaction."
+      }
+    }
+  ]
+}
+</script>
+
 <style>
 /* ========== Reset & Base ========== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#1a1a2e; --bg2:#16213e; --card:#0f3460; --card2:#1a1a3e;
-  --text:#e0e0e0; --text-dim:#888; --accent:#e94560; --accent2:#0f9b8e;
-  --gold:#ffd700; --gold-bg:#3a3200; --red:#e94560; --red-bg:#3a1520;
-  --blue:#4a90d9; --blue-bg:#1a2a4a; --green:#2ecc71; --green-bg:#1a3a2a;
-  --purple:#9b59b6; --purple-bg:#2a1a3a; --orange:#e67e22; --orange-bg:#3a2a10;
-  --border:#333; --border-light:#444; --radius:6px;
-  --tile-size:42px; --tile-font:18px; --board-size:672px;
+  --bg:#0d1117; --bg2:#161b22; --bg3:#21262d;
+  --card:#1c2128; --card2:#2d333b;
+  --text:#e6edf3; --text-dim:#7d8590; --text-bright:#f0f6fc;
+  --accent:#e94560; --accent2:#3fb950;
+  --gold:#d29922; --gold-bg:#3a2e00; --gold-light:#e3b341;
+  --red:#f85149; --red-bg:#4a0e0e;
+  --blue:#58a6ff; --blue-bg:#0d2240;
+  --green:#3fb950; --green-bg:#0d2818;
+  --purple:#bc8cff; --purple-bg:#2a1a4a;
+  --orange:#f0883e; --orange-bg:#3a200a;
+  --border:#30363d; --border-light:#484f58;
+  --radius:8px;
+  --tile-size:min(clamp(24px,calc((100vw - 420px) / 15),48px),clamp(24px,calc((100vh - 140px) / 15),48px));
+  --tile-font:calc(var(--tile-size) * 0.42);
+  --rack-tile:clamp(30px,calc((100vw - 40px) / 8),48px);
+  --rack-font:calc(var(--rack-tile) * 0.45);
 }
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center}
-h1{font-size:1.6rem;margin:8px 0;letter-spacing:2px}
-h1 .accent{color:var(--accent)}
-.subtitle{color:var(--text-dim);font-size:.85rem;margin-bottom:8px}
+html{height:100%;overflow:hidden}
+body{
+  font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);height:100vh;height:100dvh;
+  display:flex;flex-direction:column;overflow:hidden;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color:transparent;
+}
 .hidden{display:none!important}
 
-/* ========== Layout ========== */
-#game-container{display:flex;gap:16px;padding:8px;max-width:100%;flex-wrap:wrap;justify-content:center}
-#left-panel{display:flex;flex-direction:column;gap:8px;min-width:280px}
-#right-panel{display:flex;flex-direction:column;gap:8px;min-width:260px;max-width:300px}
+/* ========== Header ========== */
+#header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);
+  flex-shrink:0;min-height:40px
+}
+#header .title{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:700;letter-spacing:1px}
+#header .title .accent{color:var(--accent)}
+#header .subtitle{font-size:.7rem;color:var(--text-dim);margin-left:8px;display:none}
+@media(min-width:800px){#header .subtitle{display:inline}}
+
+/* ========== Main Layout ========== */
+#main{
+  flex:1;display:grid;overflow:hidden;
+  grid-template-columns:auto 1fr auto;
+  grid-template-rows:1fr auto;
+  gap:0;
+}
+#left-panel{
+  grid-column:1;grid-row:1 / 3;
+  display:flex;flex-direction:column;gap:6px;padding:8px;
+  width:220px;overflow-y:auto;flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+}
+#center-panel{
+  grid-column:2;grid-row:1;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;padding:8px;
+}
+#bottom-panel{
+  grid-column:2;grid-row:2;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:6px 8px 10px;background:var(--bg2);border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+#right-panel{
+  grid-column:3;grid-row:1 / 3;
+  display:flex;flex-direction:column;gap:6px;padding:8px;
+  width:200px;overflow-y:auto;flex-shrink:0;
+  background:var(--bg2);border-left:1px solid var(--border);
+}
 
 /* ========== Board ========== */
-#board-wrapper{position:relative}
 #board{
-  display:grid;grid-template-columns:repeat(15,var(--tile-size));grid-template-rows:repeat(15,var(--tile-size));
-  gap:1px;background:var(--border);border:2px solid var(--border-light);border-radius:var(--radius);padding:2px
+  display:grid;
+  grid-template-columns:repeat(15,var(--tile-size));
+  grid-template-rows:repeat(15,var(--tile-size));
+  gap:1px;background:var(--border);border:2px solid var(--border-light);
+  border-radius:var(--radius);padding:2px;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+  max-width:100%;max-height:100%;
 }
 .cell{
-  width:var(--tile-size);height:var(--tile-size);display:flex;align-items:center;justify-content:center;
-  font-size:8px;font-weight:bold;color:var(--text-dim);text-transform:uppercase;cursor:pointer;
-  position:relative;user-select:none;background:var(--card);transition:background .15s
+  width:var(--tile-size);height:var(--tile-size);
+  display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--tile-size) * 0.22);font-weight:700;
+  color:var(--text-dim);text-transform:uppercase;cursor:pointer;
+  position:relative;user-select:none;background:var(--card);
+  transition:background .12s;overflow:hidden;
 }
 .cell:hover{background:var(--card2)}
-.cell.placed{background:var(--accent)!important}
-.cell.placed-letter{background:#2a4a6a}
-.cell.placed-letter:hover{background:#3a5a7a}
-.cell.bonus-label{font-size:7px;text-align:center;line-height:1.1}
-.cell.last-placed .tile{box-shadow:0 0 0 2px var(--gold)}
+.cell.placed-letter{background:#1a3a5a}
+.cell.placed-letter:hover{background:#2a4a6a}
+.cell.last-placed .tile{box-shadow:0 0 0 2px var(--gold-light),0 2px 6px rgba(0,0,0,.5)}
 
 /* Bonus square colors */
 .cell.tl{background:var(--blue-bg);color:var(--blue)}
 .cell.tw{background:var(--red-bg);color:var(--red)}
 .cell.dl{background:var(--green-bg);color:var(--green)}
 .cell.dw{background:var(--purple-bg);color:var(--purple)}
-.cell.qw{background:var(--gold-bg);color:var(--gold)}
+.cell.qw{background:var(--gold-bg);color:var(--gold-light)}
 .cell.ql{background:var(--orange-bg);color:var(--orange)}
-.cell.center{background:#2a3a5a}
+.cell.center{background:#1a2a4a}
+.cell.center::before{content:'★';font-size:calc(var(--tile-size) * 0.4);color:var(--gold-light)}
 
 /* ========== Tiles ========== */
 .tile{
-  width:calc(var(--tile-size) - 4px);height:calc(var(--tile-size) - 4px);border-radius:4px;
-  background:linear-gradient(135deg,#e8d5a0,#d4b878);color:#2a1a00;
-  display:flex;align-items:center;justify-content:center;font-size:var(--tile-font);font-weight:bold;
-  position:relative;cursor:pointer;user-select:none;box-shadow:1px 1px 3px rgba(0,0,0,.4)
+  width:calc(var(--tile-size) - 3px);height:calc(var(--tile-size) - 3px);
+  border-radius:calc(var(--tile-size) * 0.08);
+  background:linear-gradient(145deg,#f0e0b0,#d4b878);
+  color:#3a2a00;
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--tile-font);font-weight:800;
+  position:relative;cursor:pointer;user-select:none;
+  box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);
+  font-family:'SF Pro Display',-apple-system,sans-serif;
 }
-.tile .letter{font-size:var(--tile-font);line-height:1}
-.tile .value{position:absolute;bottom:1px;right:3px;font-size:9px;font-weight:normal;color:#5a3a00}
-.tile-blank{background:linear-gradient(135deg,#d0d0d0,#b0b0b0);color:#333}
+.tile .letter{font-size:var(--tile-font);line-height:1;font-weight:800}
+.tile .value{
+  position:absolute;bottom:1px;right:2px;
+  font-size:calc(var(--tile-size) * 0.2);font-weight:600;color:#6a4a00
+}
+.tile-blank{background:linear-gradient(145deg,#e0e0e0,#b8b8b8);color:#444}
+.tile-blank .value{color:#666}
 
 /* ========== Rack ========== */
-#rack-area{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
-#rack{display:flex;gap:3px;min-height:calc(var(--tile-size) + 8px);padding:4px;background:var(--card2);border-radius:var(--radius);border:1px solid var(--border)}
-.rack-tile{
-  width:var(--tile-size);height:var(--tile-size);border-radius:4px;
-  background:linear-gradient(135deg,#e8d5a0,#d4b878);color:#2a1a00;
-  display:flex;align-items:center;justify-content:center;font-size:var(--tile-font);font-weight:bold;
-  cursor:pointer;position:relative;user-select:none;box-shadow:1px 1px 3px rgba(0,0,0,.4);transition:transform .1s
+#rack{
+  display:flex;gap:3px;padding:6px 8px;
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border-radius:var(--radius);border:1px solid var(--border-light);
+  min-height:calc(var(--rack-tile) + 12px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.3);
 }
-.rack-tile:hover{transform:translateY(-3px)}
-.rack-tile.selected{transform:translateY(-8px);box-shadow:0 4px 8px rgba(0,0,0,.6);outline:2px solid var(--gold)}
-.rack-tile .value{position:absolute;bottom:1px;right:3px;font-size:9px;font-weight:normal;color:#5a3a00}
+.rack-tile{
+  width:var(--rack-tile);height:var(--rack-tile);
+  border-radius:calc(var(--rack-tile) * 0.08);
+  background:linear-gradient(145deg,#f0e0b0,#d4b878);
+  color:#3a2a00;
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--rack-font);font-weight:800;
+  cursor:pointer;position:relative;user-select:none;
+  box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .12s ease-out;
+  font-family:'SF Pro Display',-apple-system,sans-serif;
+}
+.rack-tile:hover{transform:translateY(-4px)}
+.rack-tile.selected{transform:translateY(-10px);box-shadow:0 6px 12px rgba(0,0,0,.5),0 0 0 2px var(--gold-light),inset 0 1px 0 rgba(255,255,255,.3)}
+.rack-tile .letter{font-size:var(--rack-font);line-height:1;font-weight:800}
+.rack-tile .value{
+  position:absolute;bottom:1px;right:2px;
+  font-size:calc(var(--rack-tile) * 0.22);font-weight:600;color:#6a4a00
+}
+.rack-tile.tile-blank{background:linear-gradient(145deg,#e0e0e0,#b8b8b8);color:#444}
+.rack-tile.tile-blank .value{color:#666}
 
 /* ========== Panels ========== */
-.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px}
-.panel h3{font-size:.9rem;margin-bottom:6px;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
-.score-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.9rem}
-.score-row.current{color:var(--gold);font-weight:bold}
-.score-row .name{display:flex;align-items:center;gap:6px}
-.score-row .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.turn-indicator{font-size:.75rem;color:var(--text-dim);margin-left:4px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:8px}
+.panel h3{font-size:.7rem;margin-bottom:4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:.85rem}
+.score-row.current{color:var(--gold-light);font-weight:700}
+.score-row .name{display:flex;align-items:center;gap:5px}
+.score-row .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.score-row .score-val{font-variant-numeric:tabular-nums;font-weight:600}
 
 /* ========== Buttons ========== */
 .btn{
-  padding:8px 14px;border:none;border-radius:var(--radius);cursor:pointer;font-size:.85rem;font-weight:600;
-  background:var(--card);color:var(--text);transition:all .15s
+  padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);
+  cursor:pointer;font-size:.78rem;font-weight:600;
+  background:var(--card2);color:var(--text);transition:all .12s;
+  white-space:nowrap;
 }
-.btn:hover{background:var(--card2);border-color:var(--accent)}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--accent);color:white}
-.btn-primary:hover{background:#f55570}
-.btn-success{background:var(--accent2);color:white}
-.btn-success:hover{background:#11b89e}
+.btn:hover{background:var(--border-light);border-color:var(--text-dim)}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--accent);color:white;border-color:var(--accent)}
+.btn-primary:hover{background:#f55570;border-color:#f55570}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-bar{display:flex;gap:6px;flex-wrap:wrap}
+.btn-bar{display:flex;gap:4px;flex-wrap:wrap}
+.btn-lg{padding:10px 16px;font-size:.85rem}
+
+/* ========== Bottom panel controls ========== */
+#bottom-panel .btn{padding:8px 14px;font-size:.8rem}
+#bottom-panel .info-text{font-size:.75rem;color:var(--text-dim);margin-right:8px;white-space:nowrap}
 
 /* ========== Blank tile picker ========== */
-#blank-picker{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000}
-#blank-picker .picker-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
-#blank-picker .picker-box h3{margin-bottom:10px}
-#blank-picker .alpha-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:280px}
-#blank-picker .alpha-btn{
-  width:36px;height:36px;border:none;border-radius:4px;background:var(--card);color:var(--text);
-  font-size:16px;font-weight:bold;cursor:pointer;transition:background .1s
+#blank-picker,.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
-#blank-picker .alpha-btn:hover{background:var(--accent)}
+.picker-box,.modal-box{
+  background:var(--bg2);border:1px solid var(--border-light);border-radius:12px;
+  padding:20px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);
+  max-width:90vw
+}
+.picker-box h3,.modal-box h3{margin-bottom:12px;color:var(--text-bright);font-size:1rem}
+.alpha-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:280px;margin:0 auto}
+.alpha-btn{
+  width:36px;height:36px;border:1px solid var(--border);border-radius:6px;
+  background:var(--card2);color:var(--text);font-size:16px;font-weight:700;
+  cursor:pointer;transition:all .1s;
+}
+.alpha-btn:hover{background:var(--accent);border-color:var(--accent);color:white}
 
 /* ========== Exchange modal ========== */
-#exchange-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000}
-#exchange-modal .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;max-width:400px}
-#exchange-modal .modal-box h3{margin-bottom:10px}
-#exchange-modal .exchange-rack{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:12px 0}
-#exchange-modal .exchange-tile{
-  width:44px;height:44px;border-radius:4px;background:linear-gradient(135deg,#e8d5a0,#d4b878);color:#2a1a00;
-  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;cursor:pointer;position:relative
+.exchange-rack{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.exchange-tile{
+  width:44px;height:44px;border-radius:6px;
+  background:linear-gradient(145deg,#f0e0b0,#d4b878);color:#3a2a00;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;cursor:pointer;position:relative;
+  box-shadow:0 2px 4px rgba(0,0,0,.4);
 }
-#exchange-modal .exchange-tile.selected{outline:3px solid var(--accent);transform:translateY(-4px)}
-#exchange-modal .exchange-tile .value{position:absolute;bottom:1px;right:3px;font-size:9px;color:#5a3a00}
+.exchange-tile.selected{outline:3px solid var(--accent);transform:translateY(-4px)}
+.exchange-tile .value{position:absolute;bottom:1px;right:2px;font-size:9px;color:#6a4a00}
+.exchange-tile.tile-blank{background:linear-gradient(145deg,#e0e0e0,#b8b8b8);color:#444}
 
 /* ========== Game over ========== */
-#game-over-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:2000}
-#game-over-overlay .modal-box{background:var(--bg2);border:2px solid var(--gold);border-radius:var(--radius);padding:30px;text-align:center;max-width:400px}
-#game-over-overlay h2{color:var(--gold);font-size:1.5rem;margin-bottom:10px}
+#game-over-overlay .modal-box{border:2px solid var(--gold);max-width:360px}
+#game-over-overlay h2{color:var(--gold-light);font-size:1.5rem;margin-bottom:10px}
 #game-over-overlay .final-scores{margin:15px 0}
 
 /* ========== Loading ========== */
 #loading-overlay{
-  position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;z-index:5000;transition:opacity .5s
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:5000;transition:opacity .5s;
 }
-#loading-overlay .spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
-#loading-overlay .loading-text{color:var(--text-dim);font-size:.9rem}
+.spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+.loading-text{color:var(--text-dim);font-size:.9rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ========== Toast ========== */
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:var(--radius);border:1px solid var(--border);font-size:.85rem;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast{
+  position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+  background:var(--card2);color:var(--text);padding:10px 20px;
+  border-radius:var(--radius);border:1px solid var(--border-light);
+  font-size:.85rem;z-index:3000;opacity:0;transition:opacity .3s;
+  pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
 #toast.show{opacity:1}
 #toast.error{border-color:var(--red);color:var(--red)}
 #toast.success{border-color:var(--accent2);color:var(--accent2)}
 
-/* ========== Word list display ========== */
-.word-list{font-size:.8rem;color:var(--text-dim);max-height:80px;overflow-y:auto;margin-top:4px}
-.word-list .word{display:inline-block;margin:2px 4px;padding:2px 6px;background:var(--card);border-radius:3px}
-.word-list .word.invalid{color:var(--red);text-decoration:line-through}
+/* ========== Help / Legend ========== */
+.legend-row{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:.72rem}
+.legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+.legend-row .lbl{font-weight:700;min-width:20px}
+.legend-row .desc{color:var(--text-dim)}
+.help-text{font-size:.7rem;line-height:1.4;color:var(--text-dim)}
 
-/* ========== Help ========== */
-#help-panel{font-size:.8rem;line-height:1.5;color:var(--text-dim)}
-#help-panel h3{margin-bottom:4px;color:var(--accent)}
-.legend-row{display:flex;align-items:center;gap:6px;margin:3px 0}
-.legend-swatch{width:16px;height:16px;border-radius:3px;flex-shrink:0}
-.legend-row span:last-child{color:var(--text)}
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}
 
-/* ========== Responsive ========== */
-@media(max-width:1100px){
-  :root{--tile-size:36px;--tile-font:16px;--board-size:576px}
-  #left-panel,#right-panel{min-width:240px}
+/* ========== Responsive: Tablet ========== */
+@media(max-width:1024px){
+  :root{--tile-size:min(clamp(20px,calc((100vw - 200px) / 15),40px),clamp(20px,calc((100vh - 160px) / 15),40px))}
+  #left-panel{width:180px}
+  #right-panel{width:170px}
 }
-@media(max-width:900px){
-  :root{--tile-size:30px;--tile-font:14px}
-  #game-container{flex-direction:column;align-items:center}
-  #left-panel,#right-panel{min-width:auto;max-width:600px;width:100%}
+
+/* ========== Responsive: Mobile ========== */
+@media(max-width:768px){
+  html{overflow:auto}
+  body{height:auto;min-height:100vh;min-height:100dvh;overflow:visible}
+  #main{
+    grid-template-columns:1fr;
+    grid-template-rows:auto 1fr auto auto;
+    overflow:visible;
+  }
+  #left-panel{
+    grid-column:1;grid-row:1;
+    flex-direction:row;flex-wrap:wrap;width:100%;
+    border-right:none;border-bottom:1px solid var(--border);
+    overflow:visible;padding:6px 8px;
+  }
+  #left-panel .panel{flex:1;min-width:120px}
+  #center-panel{
+    grid-column:1;grid-row:2;
+    padding:8px;
+  }
+  #bottom-panel{
+    grid-column:1;grid-row:3;
+    flex-wrap:wrap;
+  }
+  #right-panel{
+    grid-column:1;grid-row:4;
+    flex-direction:row;flex-wrap:wrap;width:100%;
+    border-left:none;border-top:1px solid var(--border);
+    overflow:visible;padding:6px 8px;
+  }
+  #right-panel .panel{flex:1;min-width:140px}
+  :root{--tile-size:min(clamp(20px,calc((100vw - 24px) / 15),40px),clamp(20px,calc((100vh - 200px) / 15),40px))}
+  :root{--rack-tile:clamp(30px,calc((100vw - 40px) / 8),44px)}
 }
-@media(max-width:500px){
-  :root{--tile-size:24px;--tile-font:12px}
-  .cell{font-size:6px}
-  .cell.bonus-label{font-size:5px}
-  h1{font-size:1.2rem}
+
+@media(max-width:480px){
+  :root{--tile-size:clamp(20px,calc((100vw - 20px) / 15),32px)}
+  #header{padding:4px 8px;min-height:36px}
+  #header .title{font-size:1rem}
+  .panel{padding:6px}
+  .btn{padding:6px 10px;font-size:.72rem}
+  #left-panel .panel{min-width:100px}
 }
 </style>
 </head>
@@ -184,71 +433,74 @@ h1 .accent{color:var(--accent)}
   <div class="loading-text" id="loading-text">Loading El-Bbarcs dictionary...</div>
 </div>
 
-<h1>El-<span class="accent">Bbarcs</span></h1>
-<div class="subtitle">An open-source word board game · No backend · 100% browser-native</div>
+<!-- SEO noscript fallback -->
+<noscript>
+<h1>El-Bbarcs — Free Open-Source Word Board Game</h1>
+<p>El-Bbarcs is a free, open-source word board game inspired by Scrabble and Words With Friends. It features a 15×15 grid with 100 letter tiles, a 359,039-word dictionary, and exclusive Quad Word (4× word score) and Quad Letter (4× letter score) bonus squares. The game runs entirely in your browser with no backend server, no signup, and no tracking.</p>
+<p><a href="https://github.com/james-see/el-bbarcs">View source code on GitHub</a></p>
+<p>To play, please enable JavaScript in your browser.</p>
+</noscript>
 
-<div id="game-container">
-  <!-- Left panel: scores + controls -->
+<!-- Header -->
+<div id="header">
+  <div>
+    <span class="title">El-<span class="accent">Bbarcs</span></span>
+    <span class="subtitle">Open-source word board game</span>
+  </div>
+  <button class="btn" id="btn-new-game">New Game</button>
+</div>
+
+<!-- Main game area -->
+<div id="main">
+  <!-- Left panel: scores + info -->
   <div id="left-panel">
     <div class="panel">
       <h3>Scores</h3>
       <div id="scoreboard"></div>
     </div>
     <div class="panel">
-      <h3>Controls</h3>
-      <div class="btn-bar" style="margin-bottom:8px">
-        <button class="btn btn-primary" id="btn-play">Play Word</button>
-        <button class="btn" id="btn-pass">Pass</button>
-      </div>
-      <div class="btn-bar">
-        <button class="btn" id="btn-shuffle">Shuffle Rack</button>
-        <button class="btn" id="btn-exchange">Exchange</button>
-        <button class="btn" id="btn-recall">Recall</button>
-      </div>
-    </div>
-    <div class="panel">
       <h3>Last Play</h3>
-      <div id="last-play" style="font-size:.85rem;color:var(--text-dim)">No moves yet</div>
+      <div id="last-play" style="font-size:.78rem;color:var(--text-dim)">No moves yet</div>
     </div>
     <div class="panel">
-      <h3>Tiles Left</h3>
-      <div id="tile-count" style="font-size:.85rem">100 / 100</div>
+      <h3>Tiles in Bag</h3>
+      <div id="tile-count" style="font-size:.85rem;font-weight:600">100 / 100</div>
     </div>
   </div>
 
   <!-- Center: Board -->
-  <div id="board-wrapper">
+  <div id="center-panel">
     <div id="board"></div>
   </div>
 
-  <!-- Right panel: rack + help -->
+  <!-- Bottom: Rack + Controls -->
+  <div id="bottom-panel">
+    <div id="rack"></div>
+    <div class="btn-bar">
+      <button class="btn btn-primary" id="btn-play">Play</button>
+      <button class="btn" id="btn-pass">Pass</button>
+      <button class="btn" id="btn-shuffle">Shuffle</button>
+      <button class="btn" id="btn-exchange">Exchange</button>
+      <button class="btn" id="btn-recall">Recall</button>
+    </div>
+  </div>
+
+  <!-- Right panel: legend + help -->
   <div id="right-panel">
     <div class="panel">
-      <h3 id="rack-label">Your Rack</h3>
-      <div id="rack-area">
-        <div id="rack"></div>
-      </div>
-    </div>
-    <div class="panel">
       <h3>Bonus Legend</h3>
-      <div id="help-panel">
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--red-bg)"></div><span style="color:var(--red)">TW</span><span>Triple Word</span></div>
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--gold-bg)"></div><span style="color:var(--gold)">QW</span><span>Quad Word ★</span></div>
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--purple-bg)"></div><span style="color:var(--purple)">DW</span><span>Double Word</span></div>
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--blue-bg)"></div><span style="color:var(--blue)">TL</span><span>Triple Letter</span></div>
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--orange-bg)"></div><span style="color:var(--orange)">QL</span><span>Quad Letter ★</span></div>
-        <div class="legend-row"><div class="legend-swatch" style="background:var(--green-bg)"></div><span style="color:var(--green)">DL</span><span>Double Letter</span></div>
-        <div style="margin-top:6px;font-size:.75rem">★ = El-Bbarcs exclusive bonuses</div>
-      </div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--red-bg)"></div><span class="lbl" style="color:var(--red)">TW</span><span class="desc">Triple Word</span></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--gold-bg)"></div><span class="lbl" style="color:var(--gold-light)">QW</span><span class="desc">Quad Word ★</span></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--purple-bg)"></div><span class="lbl" style="color:var(--purple)">DW</span><span class="desc">Double Word</span></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--blue-bg)"></div><span class="lbl" style="color:var(--blue)">TL</span><span class="desc">Triple Letter</span></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--orange-bg)"></div><span class="lbl" style="color:var(--orange)">QL</span><span class="desc">Quad Letter ★</span></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--green-bg)"></div><span class="lbl" style="color:var(--green)">DL</span><span class="desc">Double Letter</span></div>
     </div>
     <div class="panel">
       <h3>How to Play</h3>
-      <div id="help-panel" style="font-size:.75rem">
-        Click a rack tile, then click a board cell to place it. Build words across or down. The first word must cross the center star. Click Play Word when done. Blanks become any letter. ★ QW = 4× word score, QL = 4× letter score.
+      <div class="help-text">
+        Tap a rack tile, then tap a board cell. Build words across or down. First word must cross the center star. Tap Play when done. Blanks become any letter. QW = 4× word, QL = 4× letter.
       </div>
-    </div>
-    <div class="btn-bar">
-      <button class="btn" id="btn-new-game" style="width:100%">New Game</button>
     </div>
   </div>
 </div>
@@ -266,10 +518,10 @@ h1 .accent{color:var(--accent)}
 </div>
 
 <!-- Exchange tiles modal -->
-<div id="exchange-modal" class="hidden">
+<div id="exchange-modal" class="hidden modal-overlay">
   <div class="modal-box">
     <h3>Select tiles to exchange</h3>
-    <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px">You will lose your turn. Selected tiles go back to the bag.</p>
+    <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:8px">You will lose your turn. Selected tiles go back to the bag.</p>
     <div class="exchange-rack" id="exchange-rack"></div>
     <div class="btn-bar" style="justify-content:center;margin-top:10px">
       <button class="btn btn-primary" id="exchange-confirm">Confirm Exchange</button>
@@ -279,11 +531,11 @@ h1 .accent{color:var(--accent)}
 </div>
 
 <!-- Game over overlay -->
-<div id="game-over-overlay" class="hidden">
+<div id="game-over-overlay" class="hidden modal-overlay">
   <div class="modal-box">
     <h2 id="game-over-title">Game Over</h2>
     <div class="final-scores" id="final-scores"></div>
-    <button class="btn btn-primary" id="btn-play-again">Play Again</button>
+    <button class="btn btn-primary btn-lg" id="btn-play-again">Play Again</button>
   </div>
 </div>
 
@@ -295,9 +547,8 @@ h1 .accent{color:var(--accent)}
 // ============================================================
 const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
-const BINGO_BONUS = 50; // Using all 7 tiles in one play
+const BINGO_BONUS = 50;
 
-// Tile distribution and point values (Scrabble-standard)
 const TILE_DIST = {
   A:9, B:2, C:2, D:4, E:12, F:2, G:3, H:2, I:9, J:1,
   K:1, L:4, M:2, N:6, O:8, P:2, Q:1, R:6, S:4, T:6,
@@ -311,60 +562,37 @@ const TILE_VALUES = {
 
 // ============================================================
 // BONUS SQUARES
-// Standard Scrabble layout + El-Bbarcs exclusive QW/QL bonuses
 // ============================================================
-// Format: 'row,col' => type
 const BONUSES = {};
 function setBonus(r,c,type){BONUSES[r+','+c]=type;}
 
-// Triple Word (TW) — corners and edges (standard Scrabble positions)
 [[0,0],[0,7],[0,14],[7,0],[7,14],[14,0],[14,7],[14,14]].forEach(([r,c])=>setBonus(r,c,'tw'));
-
-// Double Word (DW) — standard positions
 [[1,1],[2,2],[3,3],[4,4],[10,10],[11,11],[12,12],[13,13],
  [1,13],[2,12],[3,11],[4,10],[10,4],[11,3],[12,2],[13,1]].forEach(([r,c])=>setBonus(r,c,'dw'));
-
-// Triple Letter (TL) — standard positions
 [[1,5],[1,9],[5,1],[5,5],[5,9],[5,13],
  [9,1],[9,5],[9,9],[9,13],[13,5],[13,9]].forEach(([r,c])=>setBonus(r,c,'tl'));
-
-// Double Letter (DL) — standard positions
 [[0,3],[0,11],[2,6],[2,8],[3,0],[3,7],[3,14],
  [6,2],[6,6],[6,8],[6,12],
  [8,2],[8,6],[8,8],[8,12],
  [11,0],[11,7],[11,14],[12,6],[12,8],[14,3],[14,11]].forEach(([r,c])=>setBonus(r,c,'dl'));
-
-// Quad Word (QW) — El-Bbarcs exclusive! 4× word score at strategic midpoints
 [[5,2],[5,12],[9,2],[9,12]].forEach(([r,c])=>setBonus(r,c,'qw'));
-
-// Quad Letter (QL) — El-Bbarcs exclusive! 4× letter score at key crosspoints
 [[2,4],[2,10],[4,2],[4,12],[10,2],[10,12],[12,4],[12,10]].forEach(([r,c])=>setBonus(r,c,'ql'));
 
-// Center star
 const CENTER = [7,7];
 
 // ============================================================
 // GAME STATE
 // ============================================================
 let G = {
-  board: [],          // 15x15 array of {letter, value, isBlank, playerId} or null
-  bag: [],            // remaining tiles
-  players: [],        // [{id, name, score, rack, color}]
-  currentPlayer: 0,
-  selectedTileIdx: null, // index into current player's rack
-  placedTiles: [],    // [{row, col, letter, value, isBlank, rackIdx}] tiles placed this turn
-  gameOver: false,
-  passCount: 0,
-  dictionaryReady: false,
-  dictionary: null,   // Set of valid words
-  lastMove: null
+  board: [], bag: [], players: [], currentPlayer: 0,
+  selectedTileIdx: null, placedTiles: [], gameOver: false,
+  passCount: 0, dictionaryReady: false, dictionary: null, lastMove: null
 };
 
 // ============================================================
 // DICTIONARY LOADING
 // ============================================================
 async function loadDictionary() {
-  // Try compressed first (gzip), fall back to plain text
   try {
     const resp = await fetch('words.txt');
     if (!resp.ok) throw new Error('Dictionary fetch failed: ' + resp.status);
@@ -380,7 +608,7 @@ async function loadDictionary() {
 }
 
 function isValidWord(word) {
-  if (!G.dictionaryReady) return true; // Allow while loading (shouldn't happen in practice)
+  if (!G.dictionaryReady) return true;
   return G.dictionary.has(word.toLowerCase());
 }
 
@@ -398,7 +626,6 @@ function createBag() {
       });
     }
   }
-  // Shuffle
   for (let i = bag.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [bag[i], bag[j]] = [bag[j], bag[i]];
@@ -408,18 +635,13 @@ function createBag() {
 
 function drawTiles(bag, count) {
   const drawn = [];
-  for (let i = 0; i < count && bag.length > 0; i++) {
-    drawn.push(bag.pop());
-  }
+  for (let i = 0; i < count && bag.length > 0; i++) drawn.push(bag.pop());
   return drawn;
 }
 
 function refillRack(player) {
   const needed = RACK_SIZE - player.rack.length;
-  if (needed > 0) {
-    const newTiles = drawTiles(G.bag, needed);
-    player.rack.push(...newTiles);
-  }
+  if (needed > 0) player.rack.push(...drawTiles(G.bag, needed));
 }
 
 // ============================================================
@@ -429,231 +651,131 @@ function initBoard() {
   G.board = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
     const row = [];
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      row.push(null);
-    }
+    for (let c = 0; c < BOARD_SIZE; c++) row.push(null);
     G.board.push(row);
   }
 }
 
-function getBonus(row, col) {
-  return BONUSES[row + ',' + col] || null;
-}
-
-function isOccupied(row, col) {
-  return G.board[row][col] !== null;
-}
-
-function getTileAt(row, col) {
-  return G.board[row][col];
-}
+function getBonus(row, col) { return BONUSES[row + ',' + col] || null; }
+function isOccupied(row, col) { return G.board[row][col] !== null; }
+function getTileAt(row, col) { return G.board[row][col]; }
 
 function placeTileOnBoard(row, col, tile, rackIdx, blankLetter) {
-  const placedTile = {
+  G.placedTiles.push({
+    row, col,
     letter: tile.isBlank ? blankLetter : tile.letter,
-    value: tile.value,
-    isBlank: tile.isBlank,
-    rackIdx: rackIdx
-  };
-  G.placedTiles.push({row, col, ...placedTile});
-}
-
-function removeTileFromBoard(row, col) {
-  const idx = G.placedTiles.findIndex(t => t.row === row && t.col === col);
-  if (idx >= 0) {
-    G.placedTiles.splice(idx, 1);
-  }
+    value: tile.value, isBlank: tile.isBlank, rackIdx
+  });
 }
 
 function commitPlacedTilesToBoard(playerId) {
   for (const t of G.placedTiles) {
     G.board[t.row][t.col] = {
-      letter: t.letter,
-      value: t.value,
-      isBlank: t.isBlank,
-      playerId: playerId
+      letter: t.letter, value: t.value, isBlank: t.isBlank, playerId
     };
   }
 }
 
-function clearPlacedTiles() {
-  G.placedTiles = [];
-}
+function clearPlacedTiles() { G.placedTiles = []; }
 
 // ============================================================
 // MOVE VALIDATION
 // ============================================================
 function validateMove() {
-  if (G.placedTiles.length === 0) {
-    return {valid: false, error: 'No tiles placed'};
-  }
+  if (G.placedTiles.length === 0) return {valid: false, error: 'No tiles placed'};
 
-  // Check all placed tiles are in a single row or column
   const rows = [...new Set(G.placedTiles.map(t => t.row))];
   const cols = [...new Set(G.placedTiles.map(t => t.col))];
   const isHorizontal = rows.length === 1;
   const isVertical = cols.length === 1;
 
-  if (!isHorizontal && !isVertical) {
-    return {valid: false, error: 'Tiles must be in a single row or column'};
-  }
+  if (!isHorizontal && !isVertical) return {valid: false, error: 'Tiles must be in a single row or column'};
 
-  // Check no overlap with existing board tiles
   for (const t of G.placedTiles) {
-    if (isOccupied(t.row, t.col)) {
-      return {valid: false, error: 'Cannot place on occupied cell'};
-    }
+    if (isOccupied(t.row, t.col)) return {valid: false, error: 'Cannot place on occupied cell'};
   }
 
-  // Check connectivity to existing board (or center for first move)
   const allCells = new Set(G.placedTiles.map(t => t.row + ',' + t.col));
-
-  // For first move, must include center
   const isFirstMove = G.board.every(row => row.every(cell => cell === null));
 
   if (isFirstMove) {
-    const includesCenter = allCells.has(CENTER[0] + ',' + CENTER[1]);
-    if (!includesCenter) {
-      return {valid: false, error: 'First word must pass through the center star'};
-    }
+    if (!allCells.has(CENTER[0] + ',' + CENTER[1])) return {valid: false, error: 'First word must pass through the center star'};
   } else {
-    // Must connect to at least one existing tile
     let connected = false;
     for (const t of G.placedTiles) {
       const neighbors = [[t.row-1,t.col],[t.row+1,t.col],[t.row,t.col-1],[t.row,t.col+1]];
       for (const [nr,nc] of neighbors) {
-        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && isOccupied(nr,nc)) {
-          connected = true;
-          break;
-        }
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && isOccupied(nr,nc)) { connected = true; break; }
       }
       if (connected) break;
     }
-    if (!connected) {
-      return {valid: false, error: 'Word must connect to existing tiles'};
-    }
+    if (!connected) return {valid: false, error: 'Word must connect to existing tiles'};
   }
 
-  // Check for gaps (tiles must be contiguous, with existing board tiles filling gaps)
   if (isHorizontal) {
-    const row = rows[0];
-    const minCol = Math.min(...cols);
-    const maxCol = Math.max(...cols);
+    const row = rows[0], minCol = Math.min(...cols), maxCol = Math.max(...cols);
     for (let c = minCol; c <= maxCol; c++) {
-      if (!allCells.has(row + ',' + c) && !isOccupied(row, c)) {
-        return {valid: false, error: 'Tiles must be contiguous (no gaps)'};
-      }
+      if (!allCells.has(row + ',' + c) && !isOccupied(row, c)) return {valid: false, error: 'Tiles must be contiguous (no gaps)'};
     }
   } else {
-    const col = cols[0];
-    const minRow = Math.min(...rows);
-    const maxRow = Math.max(...rows);
+    const col = cols[0], minRow = Math.min(...rows), maxRow = Math.max(...rows);
     for (let r = minRow; r <= maxRow; r++) {
-      if (!allCells.has(r + ',' + col) && !isOccupied(r, col)) {
-        return {valid: false, error: 'Tiles must be contiguous (no gaps)'};
-      }
+      if (!allCells.has(r + ',' + col) && !isOccupied(r, col)) return {valid: false, error: 'Tiles must be contiguous (no gaps)'};
     }
   }
 
-  // Find all words formed and validate them
   const words = findWordsFormed();
-  if (words.length === 0) {
-    return {valid: false, error: 'No words formed'};
-  }
+  if (words.length === 0) return {valid: false, error: 'No words formed'};
 
   const invalidWords = words.filter(w => !isValidWord(w.word));
-  if (invalidWords.length > 0) {
-    return {valid: false, error: 'Invalid word: ' + invalidWords.map(w => w.word).join(', ')};
-  }
+  if (invalidWords.length > 0) return {valid: false, error: 'Invalid word: ' + invalidWords.map(w => w.word).join(', ')};
 
-  // Calculate score
-  const score = calculateScore(words);
-
-  return {valid: true, words, score};
+  return {valid: true, words, score: calculateScore(words)};
 }
 
 function findWordsFormed() {
   const words = [];
   const allCells = new Set(G.placedTiles.map(t => t.row + ',' + t.col));
 
-  // Helper: get letter at cell (from board or placed tiles)
   function getLetter(r, c) {
     const key = r + ',' + c;
-    if (allCells.has(key)) {
-      const pt = G.placedTiles.find(t => t.row === r && t.col === c);
-      return pt.letter;
-    }
-    if (isOccupied(r, c)) {
-      return getTileAt(r, c).letter;
-    }
+    if (allCells.has(key)) return G.placedTiles.find(t => t.row === r && t.col === c).letter;
+    if (isOccupied(r, c)) return getTileAt(r, c).letter;
     return null;
   }
 
-  // Check each placed tile for words in both directions
   const checked = new Set();
-
-  // Horizontal word through each placed tile
   for (const t of G.placedTiles) {
     const checkKey = 'H' + t.row + ',' + t.col;
     if (checked.has(checkKey)) continue;
-
-    // Find start of horizontal word
     let startCol = t.col;
     while (startCol > 0 && getLetter(t.row, startCol - 1) !== null) startCol--;
-
-    // Find end
     let endCol = t.col;
     while (endCol < BOARD_SIZE - 1 && getLetter(t.row, endCol + 1) !== null) endCol++;
-
     if (endCol > startCol) {
-      let word = '';
-      let cells = [];
-      for (let c = startCol; c <= endCol; c++) {
-        word += getLetter(t.row, c);
-        cells.push({row: t.row, col: c});
-      }
-      // Mark all cells in this word as checked
-      for (let c = startCol; c <= endCol; c++) {
-        checked.add('H' + t.row + ',' + c);
-      }
-      // Only add if at least one placed tile is in this word
-      if (cells.some(cell => allCells.has(cell.row + ',' + cell.col))) {
-        words.push({word, cells, direction: 'horizontal'});
-      }
+      let word = '', cells = [];
+      for (let c = startCol; c <= endCol; c++) { word += getLetter(t.row, c); cells.push({row: t.row, col: c}); }
+      for (let c = startCol; c <= endCol; c++) checked.add('H' + t.row + ',' + c);
+      if (cells.some(cell => allCells.has(cell.row + ',' + cell.col))) words.push({word, cells, direction: 'horizontal'});
     }
   }
 
-  // Vertical word through each placed tile
   checked.clear();
   for (const t of G.placedTiles) {
     const checkKey = 'V' + t.row + ',' + t.col;
     if (checked.has(checkKey)) continue;
-
     let startRow = t.row;
     while (startRow > 0 && getLetter(startRow - 1, t.col) !== null) startRow--;
-
     let endRow = t.row;
     while (endRow < BOARD_SIZE - 1 && getLetter(endRow + 1, t.col) !== null) endRow++;
-
     if (endRow > startRow) {
-      let word = '';
-      let cells = [];
-      for (let r = startRow; r <= endRow; r++) {
-        word += getLetter(r, t.col);
-        cells.push({row: r, col: t.col});
-      }
-      for (let r = startRow; r <= endRow; r++) {
-        checked.add('V' + r + ',' + t.col);
-      }
-      if (cells.some(cell => allCells.has(cell.row + ',' + cell.col))) {
-        words.push({word, cells, direction: 'vertical'});
-      }
+      let word = '', cells = [];
+      for (let r = startRow; r <= endRow; r++) { word += getLetter(r, t.col); cells.push({row: r, col: t.col}); }
+      for (let r = startRow; r <= endRow; r++) checked.add('V' + r + ',' + t.col);
+      if (cells.some(cell => allCells.has(cell.row + ',' + cell.col))) words.push({word, cells, direction: 'vertical'});
     }
   }
 
-  // Filter: a single tile placed adjacent to existing tiles forms a word in the cross direction
-  // The above handles 2+ letter words. But a single placed tile with no extension in a direction
-  // should not produce a 1-letter "word". Words of length 1 are invalid in Scrabble.
   return words.filter(w => w.word.length >= 2);
 }
 
@@ -662,22 +784,13 @@ function calculateScore(words) {
   const allCells = new Set(G.placedTiles.map(t => t.row + ',' + t.col));
 
   for (const wordObj of words) {
-    let wordScore = 0;
-    let wordMultiplier = 1;
-
+    let wordScore = 0, wordMultiplier = 1;
     for (const cell of wordObj.cells) {
       const bonus = getBonus(cell.row, cell.col);
       const isPlaced = allCells.has(cell.row + ',' + cell.col);
-      let letterValue;
-
-      if (isPlaced) {
-        const pt = G.placedTiles.find(t => t.row === cell.row && t.col === cell.col);
-        letterValue = pt.value;
-      } else {
-        letterValue = getTileAt(cell.row, cell.col).value;
-      }
-
-      // Apply letter bonuses only for newly placed tiles
+      let letterValue = isPlaced
+        ? G.placedTiles.find(t => t.row === cell.row && t.col === cell.col).value
+        : getTileAt(cell.row, cell.col).value;
       if (isPlaced && bonus) {
         switch(bonus) {
           case 'dl': letterValue *= 2; break;
@@ -688,19 +801,13 @@ function calculateScore(words) {
           case 'qw': wordMultiplier *= 4; break;
         }
       }
-
       wordScore += letterValue;
     }
-
     wordScore *= wordMultiplier;
     totalScore += wordScore;
   }
 
-  // Bingo bonus
-  if (G.placedTiles.length === RACK_SIZE) {
-    totalScore += BINGO_BONUS;
-  }
-
+  if (G.placedTiles.length === RACK_SIZE) totalScore += BINGO_BONUS;
   return totalScore;
 }
 
@@ -731,11 +838,10 @@ function renderBoard() {
         const tile = getTileAt(r, c);
         cell.innerHTML = renderTileHTML(tile.letter, tile.value, tile.isBlank);
       } else if (bonus) {
-        cell.classList.add(bonus, 'bonus-label');
+        cell.classList.add(bonus);
         cell.textContent = bonus.toUpperCase();
       } else if (r === CENTER[0] && c === CENTER[1]) {
         cell.classList.add('center');
-        cell.textContent = '★';
       }
 
       cell.addEventListener('click', () => onCellClick(r, c));
@@ -759,15 +865,11 @@ function renderRack() {
     tileEl.className = 'rack-tile';
     if (idx === G.selectedTileIdx) tileEl.classList.add('selected');
     if (tile.isBlank) tileEl.classList.add('tile-blank');
-
     const letter = tile.isBlank ? '?' : tile.letter;
     tileEl.innerHTML = `<span class="letter">${letter}</span><span class="value">${tile.value}</span>`;
     tileEl.addEventListener('click', () => onRackTileClick(idx));
     rackEl.appendChild(tileEl);
   });
-
-  // Update label
-  document.getElementById('rack-label').textContent = player.name + "'s Rack";
 }
 
 function renderScoreboard() {
@@ -777,10 +879,7 @@ function renderScoreboard() {
     const row = document.createElement('div');
     row.className = 'score-row';
     if (i === G.currentPlayer) row.classList.add('current');
-    row.innerHTML = `
-      <span class="name"><span class="dot" style="background:${p.color}"></span>${p.name}</span>
-      <span>${p.score}</span>
-    `;
+    row.innerHTML = `<span class="name"><span class="dot" style="background:${p.color}"></span>${p.name}</span><span class="score-val">${p.score}</span>`;
     el.appendChild(row);
   });
 }
@@ -794,18 +893,14 @@ function renderLastPlay() {
   const el = document.getElementById('last-play');
   if (G.lastMove) {
     const m = G.lastMove;
-    el.innerHTML = `<div><strong style="color:${m.color}">${m.player}</strong> played: ${m.words.join(', ')} (+${m.score})</div>`;
+    el.innerHTML = `<strong style="color:${m.color}">${m.player}</strong>: ${m.words.join(', ')} <span style="color:var(--accent2)">+${m.score}</span>`;
   } else {
     el.textContent = 'No moves yet';
   }
 }
 
 function renderAll() {
-  renderBoard();
-  renderRack();
-  renderScoreboard();
-  renderTileCount();
-  renderLastPlay();
+  renderBoard(); renderRack(); renderScoreboard(); renderTileCount(); renderLastPlay();
 }
 
 // ============================================================
@@ -813,39 +908,21 @@ function renderAll() {
 // ============================================================
 function onRackTileClick(idx) {
   if (G.gameOver) return;
-  if (G.selectedTileIdx === idx) {
-    G.selectedTileIdx = null;
-  } else {
-    G.selectedTileIdx = idx;
-  }
+  G.selectedTileIdx = (G.selectedTileIdx === idx) ? null : idx;
   renderRack();
 }
 
 function onCellClick(row, col) {
   if (G.gameOver) return;
-
-  // If cell has a placed tile, remove it back to rack
   const placedIdx = G.placedTiles.findIndex(t => t.row === row && t.col === col);
-  if (placedIdx >= 0) {
-    G.placedTiles.splice(placedIdx, 1);
-    renderBoard();
-    return;
-  }
-
-  // If cell is occupied by a committed tile, do nothing
+  if (placedIdx >= 0) { G.placedTiles.splice(placedIdx, 1); renderBoard(); return; }
   if (isOccupied(row, col)) return;
-
-  // Need a selected rack tile
-  if (G.selectedTileIdx === null) {
-    showToast('Select a tile from your rack first', 'error');
-    return;
-  }
+  if (G.selectedTileIdx === null) { showToast('Select a tile from your rack first', 'error'); return; }
 
   const player = G.players[G.currentPlayer];
   const tile = player.rack[G.selectedTileIdx];
 
   if (tile.isBlank) {
-    // Show blank picker
     showBlankPicker((letter) => {
       placeTileOnBoard(row, col, tile, G.selectedTileIdx, letter.toUpperCase());
       player.rack.splice(G.selectedTileIdx, 1);
@@ -864,23 +941,15 @@ function showBlankPicker(callback) {
   const picker = document.getElementById('blank-picker');
   const grid = document.getElementById('alpha-grid');
   grid.innerHTML = '';
-
   for (let i = 0; i < 26; i++) {
     const letter = String.fromCharCode(65 + i);
     const btn = document.createElement('button');
     btn.className = 'alpha-btn';
     btn.textContent = letter;
-    btn.addEventListener('click', () => {
-      picker.classList.add('hidden');
-      callback(letter);
-    });
+    btn.addEventListener('click', () => { picker.classList.add('hidden'); callback(letter); });
     grid.appendChild(btn);
   }
-
-  document.getElementById('blank-cancel').onclick = () => {
-    picker.classList.add('hidden');
-  };
-
+  document.getElementById('blank-cancel').onclick = () => picker.classList.add('hidden');
   picker.classList.remove('hidden');
 }
 
@@ -889,29 +958,14 @@ function showBlankPicker(callback) {
 // ============================================================
 function playWord() {
   if (G.gameOver) return;
-  if (G.placedTiles.length === 0) {
-    showToast('Place tiles on the board first', 'error');
-    return;
-  }
-
+  if (G.placedTiles.length === 0) { showToast('Place tiles on the board first', 'error'); return; }
   const result = validateMove();
-  if (!result.valid) {
-    showToast(result.error, 'error');
-    return;
-  }
+  if (!result.valid) { showToast(result.error, 'error'); return; }
 
   const player = G.players[G.currentPlayer];
   player.score += result.score;
-
   commitPlacedTilesToBoard(player.id);
-
-  G.lastMove = {
-    player: player.name,
-    color: player.color,
-    words: result.words.map(w => w.word),
-    score: result.score
-  };
-
+  G.lastMove = { player: player.name, color: player.color, words: result.words.map(w => w.word), score: result.score };
   G.passCount = 0;
   clearPlacedTiles();
   refillRack(player);
@@ -920,16 +974,9 @@ function playWord() {
 
 function passTurn() {
   if (G.gameOver) return;
-
-  // Return any placed tiles to rack
   recallTiles();
-
   G.passCount++;
-  if (G.passCount >= 4) {
-    endGame();
-    return;
-  }
-
+  if (G.passCount >= 4) { endGame(); return; }
   const player = G.players[G.currentPlayer];
   G.lastMove = {player: player.name, color: player.color, words: ['(passed)'], score: 0};
   showToast(player.name + ' passed');
@@ -940,11 +987,7 @@ function recallTiles() {
   if (G.placedTiles.length === 0) return;
   const player = G.players[G.currentPlayer];
   for (const t of G.placedTiles) {
-    player.rack.push({
-      letter: t.isBlank ? '' : t.letter,
-      value: t.value,
-      isBlank: t.isBlank
-    });
+    player.rack.push({ letter: t.isBlank ? '' : t.letter, value: t.value, isBlank: t.isBlank });
   }
   clearPlacedTiles();
   G.selectedTileIdx = null;
@@ -969,57 +1012,28 @@ function nextTurn() {
 }
 
 function checkGameEnd() {
-  // Game ends if bag is empty and a player has no tiles
   if (G.bag.length === 0) {
-    for (const p of G.players) {
-      if (p.rack.length === 0) {
-        endGame();
-        return;
-      }
-    }
+    for (const p of G.players) { if (p.rack.length === 0) { endGame(); return; } }
   }
 }
 
 function endGame() {
   G.gameOver = true;
+  G.players.forEach(p => { let penalty = 0; for (const t of p.rack) penalty += t.value; p.score -= penalty; });
 
-  // Subtract unplayed tile values from each player
-  G.players.forEach(p => {
-    let penalty = 0;
-    for (const t of p.rack) {
-      penalty += t.value;
-    }
-    p.score -= penalty;
-  });
-
-  // Find winner
-  let winner = G.players[0];
-  let tie = false;
+  let winner = G.players[0], tie = false;
   for (let i = 1; i < G.players.length; i++) {
-    if (G.players[i].score > winner.score) {
-      winner = G.players[i];
-      tie = false;
-    } else if (G.players[i].score === winner.score) {
-      tie = true;
-    }
+    if (G.players[i].score > winner.score) { winner = G.players[i]; tie = false; }
+    else if (G.players[i].score === winner.score) tie = true;
   }
 
   const overlay = document.getElementById('game-over-overlay');
-  const title = document.getElementById('game-over-title');
-  const scores = document.getElementById('final-scores');
-
-  if (tie) {
-    title.textContent = "It's a Tie!";
-  } else {
-    title.textContent = winner.name + ' Wins!';
-  }
-
+  document.getElementById('game-over-title').textContent = tie ? "It's a Tie!" : winner.name + ' Wins!';
   let html = '';
   G.players.forEach(p => {
-    html += `<div class="score-row"><span class="name"><span class="dot" style="background:${p.color}"></span>${p.name}</span><span>${p.score}</span></div>`;
+    html += `<div class="score-row"><span class="name"><span class="dot" style="background:${p.color}"></span>${p.name}</span><span class="score-val">${p.score}</span></div>`;
   });
-  scores.innerHTML = html;
-
+  document.getElementById('final-scores').innerHTML = html;
   overlay.classList.remove('hidden');
   renderAll();
 }
@@ -1029,11 +1043,7 @@ function endGame() {
 // ============================================================
 function showExchangeModal() {
   if (G.gameOver) return;
-  if (G.bag.length < 1) {
-    showToast('Not enough tiles in bag to exchange', 'error');
-    return;
-  }
-
+  if (G.bag.length < 1) { showToast('Not enough tiles in bag to exchange', 'error'); return; }
   recallTiles();
 
   const modal = document.getElementById('exchange-modal');
@@ -1046,44 +1056,21 @@ function showExchangeModal() {
     const tileEl = document.createElement('div');
     tileEl.className = 'exchange-tile';
     if (tile.isBlank) tileEl.classList.add('tile-blank');
-    const letter = tile.isBlank ? '?' : tile.letter;
-    tileEl.innerHTML = `<span class="letter">${letter}</span><span class="value">${tile.value}</span>`;
+    tileEl.innerHTML = `<span class="letter">${tile.isBlank ? '?' : tile.letter}</span><span class="value">${tile.value}</span>`;
     tileEl.addEventListener('click', () => {
-      if (selected.has(idx)) {
-        selected.delete(idx);
-        tileEl.classList.remove('selected');
-      } else {
-        selected.add(idx);
-        tileEl.classList.add('selected');
-      }
+      if (selected.has(idx)) { selected.delete(idx); tileEl.classList.remove('selected'); }
+      else { selected.add(idx); tileEl.classList.add('selected'); }
     });
     rackEl.appendChild(tileEl);
   });
 
   document.getElementById('exchange-confirm').onclick = () => {
-    if (selected.size === 0) {
-      showToast('Select at least one tile to exchange', 'error');
-      return;
-    }
-    if (selected.size > G.bag.length) {
-      showToast('Not enough tiles in bag', 'error');
-      return;
-    }
-
-    // Put selected tiles back in bag, draw new ones
+    if (selected.size === 0) { showToast('Select at least one tile to exchange', 'error'); return; }
+    if (selected.size > G.bag.length) { showToast('Not enough tiles in bag', 'error'); return; }
     const indices = [...selected].sort((a,b) => b - a);
-    const exchanged = [];
-    for (const idx of indices) {
-      const tile = player.rack.splice(idx, 1)[0];
-      G.bag.push(tile);
-    }
-    // Shuffle bag
-    for (let i = G.bag.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [G.bag[i], G.bag[j]] = [G.bag[j], G.bag[i]];
-    }
+    for (const idx of indices) { G.bag.push(player.rack.splice(idx, 1)[0]); }
+    for (let i = G.bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [G.bag[i], G.bag[j]] = [G.bag[j], G.bag[i]]; }
     refillRack(player);
-
     G.passCount++;
     modal.classList.add('hidden');
     showToast('Exchanged ' + selected.size + ' tiles', 'success');
@@ -1091,10 +1078,7 @@ function showExchangeModal() {
     nextTurn();
   };
 
-  document.getElementById('exchange-cancel').onclick = () => {
-    modal.classList.add('hidden');
-  };
-
+  document.getElementById('exchange-cancel').onclick = () => modal.classList.add('hidden');
   modal.classList.remove('hidden');
 }
 
@@ -1117,20 +1101,14 @@ function showToast(msg, type) {
 // ============================================================
 function newGame() {
   G = {
-    board: [],
-    bag: createBag(),
+    board: [], bag: createBag(),
     players: [
       {id: 0, name: 'Player 1', score: 0, rack: [], color: '#e94560'},
-      {id: 1, name: 'Player 2', score: 0, rack: [], color: '#0f9b8e'}
+      {id: 1, name: 'Player 2', score: 0, rack: [], color: '#3fb950'}
     ],
-    currentPlayer: 0,
-    selectedTileIdx: null,
-    placedTiles: [],
-    gameOver: false,
-    passCount: 0,
-    dictionaryReady: G.dictionaryReady,
-    dictionary: G.dictionary,
-    lastMove: null
+    currentPlayer: 0, selectedTileIdx: null, placedTiles: [],
+    gameOver: false, passCount: 0,
+    dictionaryReady: G.dictionaryReady, dictionary: G.dictionary, lastMove: null
   };
   initBoard();
   G.players.forEach(p => refillRack(p));
@@ -1146,9 +1124,7 @@ document.getElementById('btn-pass').addEventListener('click', passTurn);
 document.getElementById('btn-shuffle').addEventListener('click', shuffleRack);
 document.getElementById('btn-exchange').addEventListener('click', showExchangeModal);
 document.getElementById('btn-recall').addEventListener('click', recallTiles);
-document.getElementById('btn-new-game').addEventListener('click', () => {
-  if (confirm('Start a new game?')) newGame();
-});
+document.getElementById('btn-new-game').addEventListener('click', () => { if (confirm('Start a new game?')) newGame(); });
 document.getElementById('btn-play-again').addEventListener('click', newGame);
 
 // ============================================================
@@ -1165,10 +1141,7 @@ document.getElementById('btn-play-again').addEventListener('click', newGame);
     loadingText.textContent = 'Warning: Dictionary failed to load — words will not be validated';
     console.error('Dictionary load failed:', e);
   }
-
   newGame();
-
-  // Fade out loading overlay
   const overlay = document.getElementById('loading-overlay');
   overlay.style.opacity = '0';
   setTimeout(() => overlay.style.display = 'none', 500);

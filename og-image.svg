@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0e0b0"/>
+      <stop offset="100%" stop-color="#d4b878"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Title -->
+  <text x="600" y="80" text-anchor="middle" font-family="SF Pro Display, -apple-system, sans-serif" font-size="56" font-weight="800" fill="#e6edf3">
+    El-<tspan fill="#e94560">Bbarcs</tspan>
+  </text>
+  <text x="600" y="120" text-anchor="middle" font-family="SF Pro Display, -apple-system, sans-serif" font-size="22" fill="#7d8590">
+    Free Open-Source Word Board Game
+  </text>
+  
+  <!-- Sample tiles -->
+  <g transform="translate(420, 180)">
+    <!-- E -->
+    <rect x="0" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="40" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">E</text>
+    <text x="72" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">1</text>
+    
+    <!-- L -->
+    <rect x="90" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="130" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">L</text>
+    <text x="162" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">1</text>
+    
+    <!-- QW bonus tile -->
+    <rect x="180" y="0" width="80" height="80" rx="8" fill="#3a2e00" stroke="#d29922" stroke-width="2"/>
+    <text x="220" y="48" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="800" fill="#e3b341">QW</text>
+    <text x="220" y="68" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#d29922">4× word</text>
+    
+    <!-- B -->
+    <rect x="270" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="310" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">B</text>
+    <text x="342" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">3</text>
+    
+    <!-- A -->
+    <rect x="360" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="400" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">A</text>
+    <text x="432" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">1</text>
+    
+    <!-- R -->
+    <rect x="450" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="490" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">R</text>
+    <text x="522" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">1</text>
+    
+    <!-- C -->
+    <rect x="540" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="580" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">C</text>
+    <text x="612" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">3</text>
+    
+    <!-- S -->
+    <rect x="630" y="0" width="80" height="80" rx="8" fill="url(#tile)" stroke="#3a2a00" stroke-width="1"/>
+    <text x="670" y="52" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="36" font-weight="800" fill="#3a2a00">S</text>
+    <text x="702" y="72" text-anchor="end" font-family="sans-serif" font-size="14" fill="#6a4a00">1</text>
+  </g>
+  
+  <!-- Feature highlights -->
+  <text x="600" y="340" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#e6edf3">
+    15×15 board · 100 tiles · 359K word dictionary
+  </text>
+  <text x="600" y="380" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#e3b341">
+    ★ Quad Word (4×) &amp; Quad Letter (4×) exclusive bonuses ★
+  </text>
+  <text x="600" y="430" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#7d8590">
+    No backend · No signup · No tracking · 100% browser-native
+  </text>
+  
+  <!-- URL -->
+  <text x="600" y="520" text-anchor="middle" font-family="monospace" font-size="24" fill="#58a6ff">
+    james-see.github.io/el-bbarcs
+  </text>
+  
+  <!-- GitHub -->
+  <text x="600" y="560" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#7d8590">
+    Open source (MIT) · github.com/james-see/el-bbarcs
+  </text>
+</svg>
