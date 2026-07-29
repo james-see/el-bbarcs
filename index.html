@@ -212,6 +212,8 @@ body{
 .cell.placed-letter{background:#1a3a5a}
 .cell.placed-letter:hover{background:#2a4a6a}
 .cell.last-placed .tile{box-shadow:0 0 0 2px var(--gold-light),0 2px 6px rgba(0,0,0,.5)}
+.cell.drag-over{background:var(--accent)!important;outline:2px dashed var(--gold-light);outline-offset:-2px}
+.cell.placed-letter.drag-over{background:#3a5a7a!important}
 
 /* Bonus square colors */
 .cell.tl{background:var(--blue-bg);color:var(--blue)}
@@ -251,6 +253,7 @@ body{
   min-height:calc(var(--rack-tile) + 12px);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.3);
 }
+#rack.drag-over{outline:2px dashed var(--gold-light);outline-offset:-2px}
 .rack-tile{
   width:var(--rack-tile);height:var(--rack-tile);
   border-radius:calc(var(--rack-tile) * 0.08);
@@ -265,6 +268,8 @@ body{
 }
 .rack-tile:hover{transform:translateY(-4px)}
 .rack-tile.selected{transform:translateY(-10px);box-shadow:0 6px 12px rgba(0,0,0,.5),0 0 0 2px var(--gold-light),inset 0 1px 0 rgba(255,255,255,.3)}
+.rack-tile.dragging{opacity:.4;cursor:grabbing}
+.rack-tile[draggable=true]{cursor:grab}
 .rack-tile .letter{font-size:var(--rack-font);line-height:1;font-weight:800}
 .rack-tile .value{
   position:absolute;bottom:1px;right:2px;
@@ -1055,6 +1060,13 @@ function renderBoard() {
       if (placed) {
         cell.classList.add('placed-letter', 'last-placed');
         cell.innerHTML = renderTileHTML(placed.letter, placed.value, placed.isBlank);
+        cell.draggable = true;
+        cell.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({source: 'board', row, col}));
+          e.dataTransfer.effectAllowed = 'move';
+          cell.style.opacity = '0.4';
+        });
+        cell.addEventListener('dragend', () => { cell.style.opacity = '1'; });
       } else if (occupied) {
         cell.classList.add('placed-letter');
         const tile = getTileAt(r, c);
@@ -1065,6 +1077,28 @@ function renderBoard() {
       } else if (r === CENTER[0] && c === CENTER[1]) {
         cell.classList.add('center');
       }
+
+      // Drop target for rack tiles
+      cell.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        cell.classList.add('drag-over');
+      });
+      cell.addEventListener('dragleave', () => {
+        cell.classList.remove('drag-over');
+      });
+      cell.addEventListener('drop', (e) => {
+        e.preventDefault();
+        cell.classList.remove('drag-over');
+        try {
+          const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+          if (data.source === 'rack') {
+            handleDropFromRack(data.rackIdx, row, col);
+          } else if (data.source === 'board') {
+            handleDropFromBoard(data.row, data.col, row, col);
+          }
+        } catch(err) { console.error('Drop error:', err); }
+      });
 
       cell.addEventListener('click', () => onCellClick(r, c));
       boardEl.appendChild(cell);
@@ -1085,11 +1119,22 @@ function renderRack() {
   player.rack.forEach((tile, idx) => {
     const tileEl = document.createElement('div');
     tileEl.className = 'rack-tile';
+    tileEl.draggable = true;
+    tileEl.dataset.rackIdx = idx;
     if (idx === G.selectedTileIdx) tileEl.classList.add('selected');
     if (tile.isBlank) tileEl.classList.add('tile-blank');
     const letter = tile.isBlank ? '?' : tile.letter;
     tileEl.innerHTML = `<span class="letter">${letter}</span><span class="value">${tile.value}</span>`;
     tileEl.addEventListener('click', () => onRackTileClick(idx));
+    // Drag from rack
+    tileEl.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({source: 'rack', rackIdx: idx}));
+      e.dataTransfer.effectAllowed = 'move';
+      tileEl.classList.add('dragging');
+    });
+    tileEl.addEventListener('dragend', () => {
+      tileEl.classList.remove('dragging');
+    });
     rackEl.appendChild(tileEl);
   });
 }
@@ -1123,6 +1168,53 @@ function renderLastPlay() {
 
 function renderAll() {
   renderBoard(); renderRack(); renderScoreboard(); renderTileCount(); renderLastPlay();
+}
+
+// ============================================================
+// DRAG AND DROP HANDLERS
+// ============================================================
+function handleDropFromRack(rackIdx, row, col) {
+  if (G.gameOver) return;
+  if (isOccupied(row, col)) return;
+  // Check if there's already a placed tile at this position — if so, return it first
+  const existingPlaced = G.placedTiles.findIndex(t => t.row === row && t.col === col);
+  if (existingPlaced >= 0) return;
+
+  const player = G.players[G.currentPlayer];
+  const tile = player.rack[rackIdx];
+  if (!tile) return;
+
+  if (tile.isBlank) {
+    showBlankPicker((letter) => {
+      placeTileOnBoard(row, col, tile, rackIdx, letter.toUpperCase());
+      player.rack.splice(rackIdx, 1);
+      G.selectedTileIdx = null;
+      renderAll();
+    });
+  } else {
+    placeTileOnBoard(row, col, tile, rackIdx);
+    player.rack.splice(rackIdx, 1);
+    G.selectedTileIdx = null;
+    renderAll();
+  }
+}
+
+function handleDropFromBoard(fromRow, fromCol, toRow, toCol) {
+  if (G.gameOver) return;
+  if (fromRow === toRow && fromCol === toCol) return;
+  if (isOccupied(toRow, toCol)) return;
+  // Check target isn't already a placed tile
+  const existingPlaced = G.placedTiles.findIndex(t => t.row === toRow && t.col === toCol);
+  if (existingPlaced >= 0) return;
+
+  // Find the placed tile being dragged
+  const placedIdx = G.placedTiles.findIndex(t => t.row === fromRow && t.col === fromCol);
+  if (placedIdx < 0) return;
+
+  // Move it to the new position
+  G.placedTiles[placedIdx].row = toRow;
+  G.placedTiles[placedIdx].col = toCol;
+  renderAll();
 }
 
 // ============================================================
@@ -1382,6 +1474,38 @@ document.getElementById('btn-pass').addEventListener('click', passTurn);
 document.getElementById('btn-shuffle').addEventListener('click', shuffleRack);
 document.getElementById('btn-exchange').addEventListener('click', showExchangeModal);
 document.getElementById('btn-recall').addEventListener('click', recallTiles);
+
+// Rack as drop target (drag placed tiles back to rack)
+const rackEl = document.getElementById('rack');
+rackEl.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  rackEl.classList.add('drag-over');
+});
+rackEl.addEventListener('dragleave', () => {
+  rackEl.classList.remove('drag-over');
+});
+rackEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  rackEl.classList.remove('drag-over');
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    if (data.source === 'board') {
+      // Return the placed tile to the rack
+      const placedIdx = G.placedTiles.findIndex(t => t.row === data.row && t.col === data.col);
+      if (placedIdx >= 0) {
+        const removed = G.placedTiles.splice(placedIdx, 1)[0];
+        const player = G.players[G.currentPlayer];
+        player.rack.push({
+          letter: removed.isBlank ? '' : removed.letter,
+          value: removed.value,
+          isBlank: removed.isBlank
+        });
+        renderAll();
+      }
+    }
+  } catch(err) { console.error('Rack drop error:', err); }
+});
 document.getElementById('btn-new-game').addEventListener('click', () => {
   document.getElementById('setup-modal').classList.remove('hidden');
 });
