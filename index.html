@@ -695,9 +695,10 @@ async function loadFromOPFS() {
       for (const p of data.players) {
         await dbExec(`INSERT INTO players (id, name, games_played, games_won, total_score, best_word, best_word_score) VALUES (${p.id}, '${p.name}', ${p.games_played}, ${p.games_won}, ${p.total_score}, '${p.best_word || ''}', ${p.best_word_score || 0})`);
       }
-      // Reset sequence to max id + 1
+      // Reset sequence to max id + 1 (DuckDB-WASM doesn't support ALTER SEQUENCE)
       const maxId = data.players.reduce((m, p) => Math.max(m, p.id), 0);
-      await dbExec(`ALTER SEQUENCE seq_players RESTART WITH ${maxId + 1}`);
+      await dbExec(`DROP SEQUENCE IF EXISTS seq_players`);
+      await dbExec(`CREATE SEQUENCE seq_players START ${maxId + 1}`);
     }
     // Restore games
     if (data.games) {
@@ -705,7 +706,8 @@ async function loadFromOPFS() {
         await dbExec(`INSERT INTO games (id, player1_name, player2_name, player1_score, player2_score, winner) VALUES (${g.id}, '${g.player1_name}', '${g.player2_name}', ${g.player1_score}, ${g.player2_score}, '${g.winner}')`);
       }
       const maxId = data.games.reduce((m, g) => Math.max(m, g.id), 0);
-      await dbExec(`ALTER SEQUENCE seq_games RESTART WITH ${maxId + 1}`);
+      await dbExec(`DROP SEQUENCE IF EXISTS seq_games`);
+      await dbExec(`CREATE SEQUENCE seq_games START ${maxId + 1}`);
     }
     // Restore word history
     if (data.words) {
@@ -713,7 +715,8 @@ async function loadFromOPFS() {
         await dbExec(`INSERT INTO word_history (id, player_name, word, score) VALUES (${w.id}, '${w.player_name}', '${w.word}', ${w.score})`);
       }
       const maxId = data.words.reduce((m, w) => Math.max(m, w.id), 0);
-      await dbExec(`ALTER SEQUENCE seq_words RESTART WITH ${maxId + 1}`);
+      await dbExec(`DROP SEQUENCE IF EXISTS seq_words`);
+      await dbExec(`CREATE SEQUENCE seq_words START ${maxId + 1}`);
     }
     console.log('Loaded from OPFS:', (data.players||[]).length, 'players,', (data.games||[]).length, 'games');
   } catch(e) {
