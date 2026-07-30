@@ -1162,9 +1162,9 @@ function renderBoard() {
         try {
           const data = JSON.parse(e.dataTransfer.getData('text/plain'));
           if (data.source === 'rack') {
-            handleDropFromRack(data.rackIdx, row, col);
+            handleDropFromRack(data.rackIdx, r, c);
           } else if (data.source === 'board') {
-            handleDropFromBoard(data.row, data.col, row, col);
+            handleDropFromBoard(data.row, data.col, r, c);
           }
         } catch(err) { console.error('Drop error:', err); }
       });
