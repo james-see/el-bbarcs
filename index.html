@@ -1536,7 +1536,8 @@ function saveGameStateNow() {
     lastMove: G.lastMove,
     aiOpponent: aiOpponent ? aiOpponent.difficulty : null
   };
-  window.saveGameState(state);
+  // Fire and forget — but the promise is stored so it can complete
+  window.saveGameState(state).catch(e => console.error('Game state save failed:', e));
 }
 
 async function restoreGameState() {
@@ -2180,14 +2181,10 @@ async function aiTurn() {
     }
     // Try to restore login from DuckDB
     const restored = await restoreLogin();
-    if (restored) {
-      // Try to restore an in-progress game
-      const gameRestored = await restoreGameState();
-      if (!gameRestored) {
-        // No game in progress, don't show modals — let them click New Game
-      }
-    } else {
-      // No saved session — show login modal
+    // Try to restore an in-progress game (regardless of login status)
+    const gameRestored = await restoreGameState();
+    if (!restored && !gameRestored) {
+      // No saved session and no game — show login modal
       showLoginModal();
     }
   }, 500);
