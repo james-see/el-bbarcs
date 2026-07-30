@@ -1132,7 +1132,7 @@ function renderBoard() {
           e.dataTransfer.effectAllowed = 'move';
           cell.style.opacity = '0.4';
         });
-        cell.addEventListener('dragend', () => { cell.style.opacity = '1'; });
+        cell.addEventListener('dragend', () => { if (cell) cell.style.opacity = '1'; });
       } else if (occupied) {
         cell.classList.add('placed-letter');
         const tile = getTileAt(r, c);
@@ -1199,7 +1199,7 @@ function renderRack() {
       tileEl.classList.add('dragging');
     });
     tileEl.addEventListener('dragend', () => {
-      tileEl.classList.remove('dragging');
+      if (tileEl && tileEl.classList) tileEl.classList.remove('dragging');
     });
     rackEl.appendChild(tileEl);
   });
@@ -1260,8 +1260,7 @@ function handleDropFromRack(rackIdx, row, col) {
     placeTileOnBoard(row, col, tile, rackIdx);
     player.rack.splice(rackIdx, 1);
     G.selectedTileIdx = null;
-    // Defer render to next tick so dragend fires first
-    setTimeout(() => renderAll(), 0);
+    renderAll();
   }
 }
 
@@ -1277,7 +1276,7 @@ function handleDropFromBoard(fromRow, fromCol, toRow, toCol) {
 
   G.placedTiles[placedIdx].row = toRow;
   G.placedTiles[placedIdx].col = toCol;
-  setTimeout(() => renderAll(), 0);
+  renderAll();
 }
 
 // ============================================================
@@ -1632,7 +1631,7 @@ rackEl.addEventListener('drop', (e) => {
           value: removed.value,
           isBlank: removed.isBlank
         });
-        setTimeout(() => renderAll(), 0);
+        renderAll();
       }
     }
   } catch(err) { console.error('Rack drop error:', err); }
