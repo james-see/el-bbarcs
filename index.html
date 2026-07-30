@@ -1131,7 +1131,7 @@ function renderBoard() {
         cell.innerHTML = renderTileHTML(placed.letter, placed.value, placed.isBlank);
         cell.draggable = true;
         cell.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', JSON.stringify({source: 'board', row, col}));
+          e.dataTransfer.setData('text/plain', JSON.stringify({source: 'board', row: r, col: c}));
           e.dataTransfer.effectAllowed = 'move';
           cell.style.opacity = '0.4';
         });
